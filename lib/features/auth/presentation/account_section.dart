@@ -35,6 +35,18 @@ class AccountSection extends ConsumerWidget {
                       child: const Text('Prisijungti'),
                     ),
                 ],
+              AppUser(isAnonymous: true, :final pendingEmail?) => [
+                  const Text('Svečio režimas'),
+                  Text(
+                    'Laukiama patvirtinimo: $pendingEmail. Atidarykite laišką ir paspauskite nuorodą, '
+                    'tada grįžkite į programėlę.',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                  OutlinedButton(
+                    onPressed: action.isLoading ? null : () => _linkEmail(context, ref),
+                    child: const Text('Siųsti dar kartą / kitas adresas'),
+                  ),
+                ],
               AppUser(isAnonymous: true) => [
                   const Text('Svečio režimas'),
                   Text(
@@ -56,6 +68,27 @@ class AccountSection extends ConsumerWidget {
                 ],
               AppUser(:final email) => [
                   Text(email ?? 'Paskyra', key: const ValueKey('account-email')),
+                  if (user.needsPassword) ...[
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.tertiaryContainer,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        'Nustatykite slaptažodį – be jo kitame telefone prie paskyros neprisijungsite.',
+                        style: TextStyle(color: theme.colorScheme.onTertiaryContainer),
+                      ),
+                    ),
+                    FilledButton(
+                      onPressed: action.isLoading ? null : () => _setPassword(context, ref),
+                      child: const Text('Nustatyti slaptažodį'),
+                    ),
+                  ] else
+                    TextButton(
+                      onPressed: action.isLoading ? null : () => _setPassword(context, ref),
+                      child: const Text('Keisti slaptažodį'),
+                    ),
                   OutlinedButton(
                     onPressed: action.isLoading ? null : () => _signOut(context, ref),
                     child: const Text('Atsijungti'),
@@ -79,6 +112,15 @@ class AccountSection extends ConsumerWidget {
     );
     if (input == null) return;
     await ref.read(authControllerProvider.notifier).linkEmail(input.email);
+  }
+
+  Future<void> _setPassword(BuildContext context, WidgetRef ref) async {
+    final input = await showDialog<({String password, String confirmation})>(
+      context: context,
+      builder: (_) => const _PasswordDialog(),
+    );
+    if (input == null) return;
+    await ref.read(authControllerProvider.notifier).setPassword(input.password, input.confirmation);
   }
 
   Future<void> _signIn(BuildContext context, WidgetRef ref) async {
@@ -171,6 +213,60 @@ class _CredentialsDialogState extends State<_CredentialsDialog> {
         FilledButton(
           onPressed: () => Navigator.pop(context, (email: _email.text, password: _password.text)),
           child: const Text('Tęsti'),
+        ),
+      ],
+    );
+  }
+}
+
+class _PasswordDialog extends StatefulWidget {
+  const _PasswordDialog();
+
+  @override
+  State<_PasswordDialog> createState() => _PasswordDialogState();
+}
+
+class _PasswordDialogState extends State<_PasswordDialog> {
+  final _password = TextEditingController();
+  final _confirmation = TextEditingController();
+
+  @override
+  void dispose() {
+    _password.dispose();
+    _confirmation.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Slaptažodis'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 12,
+        children: [
+          Text('Bent 8 simboliai, raidės ir skaičiai.', style: Theme.of(context).textTheme.bodySmall),
+          TextField(
+            key: const ValueKey('new-password-field'),
+            controller: _password,
+            obscureText: true,
+            autofillHints: const [AutofillHints.newPassword],
+            decoration: const InputDecoration(labelText: 'Naujas slaptažodis'),
+          ),
+          TextField(
+            key: const ValueKey('confirm-password-field'),
+            controller: _confirmation,
+            obscureText: true,
+            autofillHints: const [AutofillHints.newPassword],
+            decoration: const InputDecoration(labelText: 'Pakartokite slaptažodį'),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Atšaukti')),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, (password: _password.text, confirmation: _confirmation.text)),
+          child: const Text('Išsaugoti'),
         ),
       ],
     );

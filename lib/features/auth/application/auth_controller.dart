@@ -33,6 +33,22 @@ class AuthController extends AsyncNotifier<String?> {
         return 'Patvirtinkite el. paštą – po to galėsite prisijungti bet kuriame įrenginyje.';
       });
 
+  Future<bool> setPassword(String password, String confirmation) =>
+      _run(() async {
+        validateNewPassword(password, confirmation);
+        await _repo.setPassword(password);
+        return 'Slaptažodis nustatytas – dabar galite prisijungti bet kuriame įrenginyje.';
+      });
+
+  /// Naujo slaptažodžio taisyklės (Supabase pusėje rekomenduojama tokias pat įjungti).
+  static void validateNewPassword(String password, String confirmation) {
+    if (password.length < 8) throw const AuthFailure('Slaptažodis turi būti bent 8 simbolių.');
+    if (!RegExp(r'\p{L}', unicode: true).hasMatch(password) || !RegExp(r'\d').hasMatch(password)) {
+      throw const AuthFailure('Slaptažodyje turi būti ir raidžių, ir skaičių.');
+    }
+    if (password != confirmation) throw const AuthFailure('Slaptažodžiai nesutampa.');
+  }
+
   Future<bool> signOut() => _run(() async {
         await _repo.signOut();
         return null;

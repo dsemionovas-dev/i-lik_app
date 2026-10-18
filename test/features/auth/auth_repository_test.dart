@@ -28,7 +28,7 @@ class _MemoryStorage extends GotrueAsyncStorage {
 }
 
 /// Supabase Auth atsakymas su sesija.
-Map<String, Object?> _session({required bool anonymous, String? email}) {
+Map<String, Object?> _session({required bool anonymous, String? email, bool confirmed = false}) {
   String b64(Object o) => base64Url.encode(utf8.encode(jsonEncode(o))).replaceAll('=', '');
   final exp = DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch ~/ 1000;
   return {
@@ -43,6 +43,7 @@ Map<String, Object?> _session({required bool anonymous, String? email}) {
       'role': 'authenticated',
       'email': email,
       'is_anonymous': anonymous,
+      if (confirmed) 'email_confirmed_at': '2026-10-18T09:05:00Z',
       'app_metadata': <String, Object>{},
       'user_metadata': <String, Object>{},
       'created_at': '2026-10-18T09:00:00Z',
@@ -129,8 +130,69 @@ void main() {
 
       expect(user.email, 'jonas@pastas.lt');
       expect(user.isAnonymous, isFalse);
-      expect(requests.single.url.path, '/auth/v1/token');
-      expect(requests.single.url.queryParameters['grant_type'], 'password');
+      expect(requests.first.url.path, '/auth/v1/token');
+      expect(requests.first.url.queryParameters['grant_type'], 'password');
+      // Prisijungė slaptažodžiu – pažymima, kad slaptažodį turi.
+      expect(requests.last.method, 'PUT');
+      expect((jsonDecode(requests.last.body) as Map<String, dynamic>)['data'], {'password_set': true});
+    });
+
+    test('susietas ir patvirtintas svečias be slaptažodžio – needsPassword', () async {
+      respond = (r) => json(r, _session(anonymous: false, email: 'jonas@pastas.lt', confirmed: true));
+      await repo.signInWithEmail('jonas@pastas.lt', 'x');
+      // Serverio atsakymas į žymos nustatymą (PUT) – tas pats vartotojas be žymos.
+      expect(repo.currentUser!.needsPassword, isTrue);
+
+      respond = (r) => json(r, {
+            ...(_session(anonymous: false, email: 'jonas@pastas.lt', confirmed: true)['user']! as Map<String, Object?>),
+            'user_metadata': {'password_set': true},
+          });
+      await repo.setPassword('Kompasas42');
+
+      final put = requests.last;
+      expect(put.url.path, '/auth/v1/user');
+      expect(jsonDecode(put.body), containsPair('password', 'Kompasas42'));
+      expect((jsonDecode(put.body) as Map<String, dynamic>)['data'], {'password_set': true});
+      expect(repo.currentUser!.needsPassword, isFalse);
+    });
+
+    test('laukiamas el. pašto patvirtinimas matomas kaip pendingEmail', () async {
+      respond = (r) => json(r, _session(anonymous: true));
+      await repo.ensureSignedIn();
+      respond = (r) => json(r, {...(_session(anonymous: true)['user']! as Map<String, Object?>), 'new_email': 'jonas@pastas.lt'});
+      await repo.linkEmail('jonas@pastas.lt');
+
+      expect(repo.currentUser!.pendingEmail, 'jonas@pastas.lt');
+      expect(repo.currentUser!.isAnonymous, isTrue);
+      expect(repo.currentUser!.needsPassword, isFalse);
+    });
+
+    test('svečiui slaptažodžio nustatyti negalima', () async {
+      respond = (r) => json(r, _session(anonymous: true));
+      await repo.ensureSignedIn();
+      expect(repo.setPassword('Kompasas42'), throwsA(isA<AuthFailure>()));
+    });
+
+    test('tas pats slaptažodis – aiškus pranešimas', () async {
+      respond = (r) => json(r, _session(anonymous: false, email: 'jonas@pastas.lt', confirmed: true));
+      await repo.signInWithEmail('jonas@pastas.lt', 'x');
+      respond = (r) => json(r, {'code': 'same_password', 'msg': 'New password should be different'}, 422);
+      expect(
+        repo.setPassword('Kompasas42'),
+        throwsA(isA<AuthFailure>().having((e) => e.message, 'message', 'Naujas slaptažodis turi skirtis nuo dabartinio.')),
+      );
+    });
+
+    test('refreshUser atnaujina vartotoją (el. paštas patvirtintas naršyklėje)', () async {
+      respond = (r) => json(r, _session(anonymous: true));
+      await repo.ensureSignedIn();
+
+      respond = (r) => json(r, _session(anonymous: false, email: 'jonas@pastas.lt', confirmed: true));
+      await repo.refreshUser();
+
+      expect(requests.last.url.queryParameters['grant_type'], 'refresh_token');
+      expect(repo.currentUser!.isAnonymous, isFalse);
+      expect(repo.currentUser!.needsPassword, isTrue);
     });
 
     test('registracija su patvirtinimu – sesijos nėra', () async {

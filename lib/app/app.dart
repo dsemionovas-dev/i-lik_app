@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../features/auth/data/auth_repository.dart';
 import '../features/progress/application/progress_controller.dart';
 import 'router/app_router.dart';
 import 'theme/app_theme.dart';
@@ -17,9 +18,13 @@ class IslikApp extends ConsumerStatefulWidget {
 
 class _IslikAppState extends ConsumerState<IslikApp> {
   /// Grįžus į programėlę (dažnai – atsiradus ryšiui) išsiunčiami sukaupti bandymai.
-  late final _lifecycle = AppLifecycleListener(
-    onResume: () => unawaited(ref.read(progressControllerProvider.notifier).syncNow()),
-  );
+  late final _lifecycle = AppLifecycleListener(onResume: _onResume);
+
+  void _onResume() {
+    unawaited(ref.read(progressControllerProvider.notifier).syncNow());
+    // El. paštas galėjo būti patvirtintas naršyklėje – atnaujinam vartotoją.
+    unawaited(ref.read(authRepositoryProvider).refreshUser().then<void>((_) {}, onError: (_) {}));
+  }
 
   @override
   void initState() {

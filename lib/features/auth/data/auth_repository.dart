@@ -31,6 +31,12 @@ abstract interface class AuthRepository {
   /// Supabase išsiunčia patvirtinimo laišką.
   Future<void> linkEmail(String email);
 
+  /// Nustato (ar pakeičia) slaptažodį prisijungusiam vartotojui.
+  Future<void> setPassword(String password);
+
+  /// Atnaujina vartotojo duomenis iš serverio (pvz., el. paštas patvirtintas naršyklėje).
+  Future<void> refreshUser();
+
   Future<void> signOut();
 }
 
@@ -45,8 +51,21 @@ class SupabaseAuthRepository implements AuthRepository {
   @override
   AppUser? get currentUser => _map(_auth.currentUser);
 
-  static AppUser? _map(User? user) =>
-      user == null ? null : AppUser(id: user.id, email: user.email, isAnonymous: user.isAnonymous);
+  /// `user_metadata` žyma, kad slaptažodis nustatytas – Supabase to neatskleidžia.
+  static const passwordSetFlag = 'password_set';
+
+  static AppUser? _map(User? user) => user == null
+      ? null
+      : AppUser(
+          id: user.id,
+          email: user.email,
+          isAnonymous: user.isAnonymous,
+          pendingEmail: user.newEmail,
+          needsPassword: !user.isAnonymous &&
+              user.email != null &&
+              user.emailConfirmedAt != null &&
+              user.userMetadata?[passwordSetFlag] != true,
+        );
 
   @override
   Stream<AppUser?> authStateChanges() {
@@ -82,12 +101,23 @@ class SupabaseAuthRepository implements AuthRepository {
   @override
   Future<AppUser> signInWithEmail(String email, String password) async {
     final response = await _guard(() => _auth.signInWithPassword(email: email.trim(), password: password));
-    return _map(response.user)!;
+    final user = response.user!;
+    // Prisijungė slaptažodžiu – vadinasi, jį turi (pvz., paskyra sukurta anksčiau).
+    if (user.userMetadata?[passwordSetFlag] != true) {
+      try {
+        await _auth.updateUser(UserAttributes(data: {passwordSetFlag: true}));
+      } catch (_) {
+        // Tik UI žyma – nepavykus, prisijungimas vis tiek sėkmingas.
+      }
+    }
+    return currentUser ?? _map(user)!;
   }
 
   @override
   Future<bool> signUpWithEmail(String email, String password) async {
-    final response = await _guard(() => _auth.signUp(email: email.trim(), password: password));
+    final response = await _guard(
+      () => _auth.signUp(email: email.trim(), password: password, data: {passwordSetFlag: true}),
+    );
     return response.session == null;
   }
 
@@ -98,6 +128,21 @@ class SupabaseAuthRepository implements AuthRepository {
       throw const AuthFailure('Susieti galima tik svečio paskyrą.');
     }
     await _guard(() => _auth.updateUser(UserAttributes(email: email.trim())));
+  }
+
+  @override
+  Future<void> setPassword(String password) async {
+    final user = currentUser;
+    if (user == null || user.isAnonymous) {
+      throw const AuthFailure('Pirmiausia susiekite ir patvirtinkite el. paštą.');
+    }
+    await _guard(() => _auth.updateUser(UserAttributes(password: password, data: {passwordSetFlag: true})));
+  }
+
+  @override
+  Future<void> refreshUser() async {
+    if (_auth.currentSession == null) return;
+    await _guard(_auth.refreshSession);
   }
 
   @override
@@ -121,7 +166,9 @@ String describeAuthError(AuthException e) => switch (e.code) {
       'invalid_credentials' => 'Neteisingas el. paštas arba slaptažodis.',
       'email_not_confirmed' => 'Pirmiausia patvirtinkite el. paštą – nuoroda išsiųsta laišku.',
       'user_already_exists' || 'email_exists' => 'Paskyra su šiuo el. paštu jau yra. Prisijunkite.',
-      'weak_password' => 'Slaptažodis per silpnas – naudokite bent 8 simbolius.',
+      'weak_password' => 'Slaptažodis per silpnas – naudokite bent 8 simbolius su raidėmis ir skaičiais.',
+      'same_password' => 'Naujas slaptažodis turi skirtis nuo dabartinio.',
+      'reauthentication_needed' => 'Dėl saugumo prisijunkite iš naujo ir pakartokite.',
       'validation_failed' || 'email_address_invalid' => 'Neteisingas el. pašto adresas.',
       'over_request_rate_limit' || 'over_email_send_rate_limit' => 'Per daug bandymų. Palaukite kelias minutes.',
       'anonymous_provider_disabled' => 'Svečio režimas serveryje išjungtas.',
@@ -172,6 +219,12 @@ class LocalGuestAuthRepository implements AuthRepository {
 
   @override
   Future<void> linkEmail(String email) async => throw _unavailable;
+
+  @override
+  Future<void> setPassword(String password) async => throw _unavailable;
+
+  @override
+  Future<void> refreshUser() async {}
 
   @override
   Future<void> signOut() async {

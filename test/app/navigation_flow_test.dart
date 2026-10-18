@@ -9,6 +9,7 @@ import 'package:islik/app/app.dart';
 import 'package:islik/core/storage/shared_preferences_provider.dart';
 import 'package:islik/features/auth/data/auth_repository.dart';
 import 'package:islik/features/auth/domain/app_user.dart';
+import 'package:islik/features/leagues/data/league_repository.dart';
 import 'package:islik/features/lesson/data/lesson_repository.dart';
 import 'package:islik/features/progress/application/progress_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -334,15 +335,95 @@ void main() {
   group('su Supabase (fiktyvus serveris)', () {
     late FakeAuthRepository auth;
     late FakeProgressRemote remote;
+    late FakeLeagueRepository leagues;
 
     List<Override> online() => [
           authRepositoryProvider.overrideWithValue(auth),
           progressRemoteDataSourceProvider.overrideWithValue(remote),
+          leagueRepositoryProvider.overrideWithValue(leagues),
         ];
 
     setUp(() {
       auth = FakeAuthRepository(user: const AppUser(id: 'guest-1', isAnonymous: true));
       remote = FakeProgressRemote(userId: 'guest-1');
+      leagues = FakeLeagueRepository(leagueOf([30, 20, 10], tier: 3, meAt: 2));
+    });
+
+    testWidgets('susietai paskyrai be slaptažodžio pasiūloma jį nustatyti', (tester) async {
+      auth.setUser(const AppUser(id: 'guest-1', email: 'jonas@pastas.lt', needsPassword: true));
+      await pumpApp(tester, onboarded: true, overrides: online());
+      await tester.tap(find.text('Profilis'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Nustatykite slaptažodį'), findsOneWidget);
+
+      Future<void> submit(String password, String confirmation) async {
+        await tapVisible(tester, find.text('Nustatyti slaptažodį'));
+        await tester.pumpAndSettle();
+        await tester.enterText(find.byKey(const ValueKey('new-password-field')), password);
+        await tester.enterText(find.byKey(const ValueKey('confirm-password-field')), confirmation);
+        await tester.tap(find.text('Išsaugoti'));
+        await tester.pumpAndSettle();
+      }
+
+      await submit('Kompasas42', 'Kompasas24');
+      expect(find.text('Slaptažodžiai nesutampa.'), findsOneWidget);
+      expect(auth.calls, isNot(contains('setPassword')));
+
+      await submit('Kompasas42', 'Kompasas42');
+      expect(auth.calls, contains('setPassword'));
+      expect(find.textContaining('Slaptažodis nustatytas'), findsOneWidget);
+      expect(find.text('Nustatyti slaptažodį'), findsNothing);
+      expect(find.text('Keisti slaptažodį'), findsOneWidget);
+    });
+
+    testWidgets('el. paštą patvirtinus naršyklėje – grįžus pasiūlomas slaptažodis', (tester) async {
+      auth.setUser(const AppUser(id: 'guest-1', isAnonymous: true, pendingEmail: 'jonas@pastas.lt'));
+      await pumpApp(tester, onboarded: true, overrides: online());
+      await tester.tap(find.text('Profilis'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Laukiama patvirtinimo: jonas@pastas.lt'), findsOneWidget);
+
+      auth.afterRefresh = const AppUser(id: 'guest-1', email: 'jonas@pastas.lt', needsPassword: true);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+
+      expect(auth.calls, contains('refreshUser'));
+      expect(find.textContaining('Laukiama patvirtinimo'), findsNothing);
+      expect(find.text('Nustatyti slaptažodį'), findsOneWidget);
+    });
+
+    testWidgets('profilyje – lygos kortelė, paspaudus – lentelė', (tester) async {
+      await pumpApp(tester, onboarded: true, overrides: online());
+      await tester.tap(find.text('Profilis'));
+      await tester.pumpAndSettle();
+      expect(find.text('Žygeivis lyga'), findsOneWidget);
+      expect(find.text('2 vieta · 20 XP šią savaitę'), findsOneWidget);
+
+      await tester.tap(find.byKey(const ValueKey('league-card')));
+      await tester.pumpAndSettle();
+      expect(find.widgetWithText(AppBar, 'Lyga'), findsOneWidget);
+      expect(find.byKey(const ValueKey('league-me')), findsOneWidget);
+      expect(find.byType(NavigationBar), findsOneWidget, reason: 'profilio skirtuko viduje');
+    });
+
+    testWidgets('išsiuntus pamoką lyga atnaujinama', (tester) async {
+      await pumpApp(tester, onboarded: true, overrides: online());
+      await tester.tap(find.text('Profilis'));
+      await tester.pumpAndSettle();
+      final before = leagues.calls;
+
+      leagues.standing = leagueOf([30, 20, 10], tier: 3, meAt: 1);
+      await tester.tap(find.text('Pradžia'));
+      await tester.pumpAndSettle();
+      await finishLessonAllWrong(tester);
+      await tester.tap(find.text('TĘSTI'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Profilis'));
+      await tester.pumpAndSettle();
+
+      expect(leagues.calls, greaterThan(before));
+      expect(find.text('1 vieta · 30 XP šią savaitę'), findsOneWidget);
     });
 
     testWidgets('užbaigta pamoka iškart išsiunčiama į serverį', (tester) async {

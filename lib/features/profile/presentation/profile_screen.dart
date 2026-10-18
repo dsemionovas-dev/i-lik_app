@@ -4,10 +4,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/router/routes.dart';
 import '../../auth/presentation/account_section.dart';
+import '../../leagues/data/league_repository.dart';
 import '../../progress/application/progress_controller.dart';
 import '../../progress/application/progress_service.dart';
 
-/// TODO: XP grafikas, kursų progresas, ženkleliai, lyga.
+/// TODO: XP grafikas, kursų progresas, ženkleliai.
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
@@ -26,10 +27,14 @@ class ProfileScreen extends ConsumerWidget {
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: () => ref.read(progressControllerProvider.notifier).syncNow(),
+        onRefresh: () async {
+          await ref.read(progressControllerProvider.notifier).syncNow();
+          ref.invalidate(leagueProvider);
+        },
         child: ListView(
           children: [
             if (progress != null) _Stats(progress: progress),
+            const _LeagueCard(),
             const AccountSection(),
           ],
         ),
@@ -91,6 +96,34 @@ class _StatTile extends StatelessWidget {
             Text(label, style: text.bodySmall),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Lyga trumpai; paspaudus – visa lentelė.
+class _LeagueCard extends ConsumerWidget {
+  const _LeagueCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (ref.watch(leagueRepositoryProvider) == null) return const SizedBox.shrink();
+    final league = ref.watch(leagueProvider);
+    final subtitle = switch (league) {
+      AsyncData(value: final s?) when s.me != null => '${s.me!.rank} vieta · ${s.me!.weeklyXp} XP šią savaitę',
+      AsyncData(value: _?) => 'Užbaik pamoką, kad prisijungtum',
+      AsyncError() => 'Nepavyko įkelti',
+      _ => '…',
+    };
+    return Card(
+      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: ListTile(
+        key: const ValueKey('league-card'),
+        leading: const Icon(Icons.emoji_events_outlined),
+        title: Text(league.value == null ? 'Lyga' : '${league.value!.tierName} lyga'),
+        subtitle: Text(subtitle),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => context.go(Routes.league),
       ),
     );
   }

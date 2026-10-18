@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/guide/presentation/guide_card_screen.dart';
 import '../../features/guide/presentation/guide_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
+import '../../features/leagues/presentation/league_screen.dart';
 import '../../features/lesson/domain/models/lesson_result.dart';
 import '../../features/lesson/presentation/lesson_result_screen.dart';
 import '../../features/lesson/presentation/lesson_screen.dart';
@@ -80,6 +81,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 GoRoute(
                   path: 'settings',
                   builder: (context, state) => const SettingsScreen(),
+                ),
+                GoRoute(
+                  path: 'league',
+                  builder: (context, state) => const LeagueScreen(),
                 ),
               ],
             ),

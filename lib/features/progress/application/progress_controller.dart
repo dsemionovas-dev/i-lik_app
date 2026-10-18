@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/supabase/supabase_providers.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../auth/domain/app_user.dart';
+import '../../leagues/data/league_repository.dart';
 import '../../lesson/domain/models/lesson.dart';
 import '../../lesson/domain/models/lesson_result.dart';
 import '../data/progress_remote_data_source.dart';
@@ -79,7 +80,10 @@ class ProgressController extends AsyncNotifier<ProgressState> {
 
   Future<SyncResult> syncNow() async {
     final result = await _service.sync();
-    if (ref.mounted) state = AsyncData(_stateFrom(_service, lastSync: result));
+    if (!ref.mounted) return result;
+    state = AsyncData(_stateFrom(_service, lastSync: result));
+    // Išsiųsti bandymai pakeitė savaitės XP lygoje.
+    if (result.uploaded > 0) ref.invalidate(leagueProvider);
     return result;
   }
 

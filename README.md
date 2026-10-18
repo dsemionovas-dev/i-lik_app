@@ -110,10 +110,21 @@ ContentRepository ── 1. Supabase (SupabaseLessonRemoteDataSource)
   4. Ištuštinus eilę parsisiunčiamas `user_lesson_progress` – sujungtas iš visų įrenginių.
 - Serveris pats skaičiuoja žvaigždutes, sumuoja XP ir ignoruoja pakartotinai atsiųstą bandymą, todėl pakartojimai ir keli įrenginiai nedubliuoja taškų.
 
+- **Slaptažodis**: susietas svečias, patvirtinęs el. paštą (naršyklėje – grįžus į programėlę vartotojas atnaujinamas), profilyje raginamas nusistatyti slaptažodį (≥ 8 simboliai, raidės ir skaičiai). Supabase neatskleidžia, ar slaptažodis yra, todėl tai žymima `user_metadata.password_set` (tik UI žyma).
+
+## Lygos
+
+- 10 lygų (Pradinukas → Rangeris), grupės iki 30, savaitė – pirmadienis 00:00 Europe/Vilnius. Top 7 kyla, paskutiniai 5 krenta (1 lygoje nekrentama, 10-oje nekylama; mažoje grupėje kilimo zona turi pirmenybę).
+- Į savaitės grupę patenkama uždirbus pirmą XP. XP į lygą ateina per trigerį ant `lesson_attempts` – pakartotiniai siuntimai nedubliuoja.
+- `close_league_week(week)` uždaro savaitę (idempotentiška). Ji kviečiama ir tingiai – pirmo kreipinio naujoje savaitėje metu, todėl `pg_cron` nebūtinas (pavyzdys – migracijos pabaigoje).
+- Klientas lentelių neskaito: `get_my_league()` grąžina tik savo grupę su slapyvardžiais („Žygeivis 1A2B3“).
+- Profilyje – lygos kortelė, `/profile/league` – lentelė su kilimo / kritimo zonomis ir praėjusios savaitės rezultatu.
+
 ### Supabase nustatymai
 
 - Authentication → Sign In / Providers: įjungti **Anonymous sign-ins** ir **Email**.
 - Rekomenduojama įjungti CAPTCHA anoniminiams prisijungimams (apsauga nuo masinio paskyrų kūrimo).
+- Authentication → Providers → Email: įjungti **Secure email change** ir pasirinkti slaptažodžio reikalavimus (raidės + skaičiai, ≥ 8).
 - Migracija `…_progress.sql` sukuria `user_lesson_progress`, `lesson_attempts` ir funkciją `record_lesson_attempt` (RLS: tik savo duomenys, rašyti – tik per funkciją).
 
 ## Kiti žingsniai

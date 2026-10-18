@@ -6,6 +6,7 @@ abstract final class Routes {
   static const guide = '/guide';
   static const profile = '/profile';
   static const settings = '/profile/settings';
+  static const league = '/profile/league';
 
   static String guideCard(String cardId) => '$guide/$cardId';
   static String lesson(String lessonId) => '/lesson/$lessonId';

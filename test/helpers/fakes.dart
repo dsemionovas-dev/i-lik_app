@@ -9,6 +9,8 @@ import 'package:islik/features/auth/data/auth_repository.dart';
 import 'package:islik/features/auth/domain/app_user.dart';
 import 'package:islik/features/lesson/data/lesson_cache.dart';
 import 'package:islik/features/lesson/data/lesson_remote_data_source.dart';
+import 'package:islik/features/leagues/data/league_repository.dart';
+import 'package:islik/features/leagues/domain/league.dart';
 import 'package:islik/features/lesson/domain/models/catalog.dart';
 import 'package:islik/features/progress/data/progress_remote_data_source.dart';
 import 'package:islik/features/progress/data/progress_store.dart';
@@ -189,5 +191,58 @@ class FakeAuthRepository implements AuthRepository {
   Future<void> linkEmail(String email) => _call('link:$email', () {});
 
   @override
+  Future<void> setPassword(String password) => _call('setPassword', () {
+        final u = _user!;
+        setUser(AppUser(id: u.id, email: u.email, isAnonymous: u.isAnonymous));
+      });
+
+  /// Imituoja, kad vartotojas tuo metu patvirtino el. paštą naršyklėje.
+  AppUser? afterRefresh;
+
+  @override
+  Future<void> refreshUser() => _call('refreshUser', () {
+        if (afterRefresh != null) setUser(afterRefresh);
+      });
+
+  @override
   Future<void> signOut() => _call('signOut', () => setUser(null));
 }
+
+/// Lyga testams: [standing] arba [error].
+class FakeLeagueRepository implements LeagueRepository {
+  FakeLeagueRepository([this.standing]);
+
+  LeagueStanding? standing;
+  Object? error;
+  var calls = 0;
+
+  @override
+  Future<LeagueStanding> fetchMyLeague() async {
+    calls++;
+    if (error != null) throw error!;
+    return standing!;
+  }
+}
+
+/// Grupė iš [xp] (mažėjančia tvarka); [meAt] – mano vieta (1..).
+LeagueStanding leagueOf(
+  List<int> xp, {
+  int tier = 3,
+  int? meAt,
+  bool joined = true,
+  LeagueLastWeek? lastWeek,
+  DateTime? weekEnd,
+}) =>
+    LeagueStanding(
+      tier: tier,
+      tierName: const ['Pradinukas', 'Stovyklautojas', 'Žygeivis', 'Pėdsekys', 'Orientuotojas',
+          'Skautas', 'Tyrinėtojas', 'Gelbėtojas', 'Instruktorius', 'Rangeris'][tier - 1],
+      weekStart: DateTime.utc(2026, 10, 12),
+      weekEnd: weekEnd ?? DateTime.utc(2026, 10, 18, 21),
+      joined: joined,
+      lastWeek: lastWeek,
+      members: [
+        for (final (i, x) in xp.indexed)
+          LeagueMember(rank: i + 1, displayName: 'Žygeivis ${i + 1}', weeklyXp: x, isMe: meAt == i + 1),
+      ],
+    );

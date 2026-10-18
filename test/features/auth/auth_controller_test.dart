@@ -53,4 +53,32 @@ void main() {
     expect(state().error, isA<AuthFailure>());
     expect(state().error.toString(), 'Nėra interneto ryšio. Pabandykite vėliau.');
   });
+
+  group('slaptažodis', () {
+    test('taisyklės: ilgis, raidės ir skaičiai, sutapimas', () async {
+      for (final (pass, confirm, message) in [
+        ('Abc123', 'Abc123', 'Slaptažodis turi būti bent 8 simbolių.'),
+        ('12345678', '12345678', 'Slaptažodyje turi būti ir raidžių, ir skaičių.'),
+        ('Kompasas', 'Kompasas', 'Slaptažodyje turi būti ir raidžių, ir skaičių.'),
+        ('Kompasas42', 'Kompasas43', 'Slaptažodžiai nesutampa.'),
+      ]) {
+        expect(await controller().setPassword(pass, confirm), isFalse, reason: pass);
+        expect(state().error.toString(), message, reason: pass);
+      }
+      expect(repo.calls, isEmpty);
+    });
+
+    test('lietuviškos raidės tinka', () {
+      expect(() => AuthController.validateNewPassword('Žąsis2026', 'Žąsis2026'), returnsNormally);
+    });
+
+    test('nustatytas – needsPassword dingsta, pranešimas', () async {
+      repo.setUser(const AppUser(id: 'u1', email: 'jonas@pastas.lt', needsPassword: true));
+      expect(await controller().setPassword('Kompasas42', 'Kompasas42'), isTrue);
+
+      expect(repo.calls, ['setPassword']);
+      expect(repo.currentUser!.needsPassword, isFalse);
+      expect(state().value, contains('Slaptažodis nustatytas'));
+    });
+  });
 }
