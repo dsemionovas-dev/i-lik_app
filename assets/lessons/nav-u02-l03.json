@@ -1,0 +1,235 @@
+{
+  "schemaVersion": "1.0",
+  "id": "nav-u02-l03",
+  "courseId": "navigation",
+  "unitId": "nav-u02",
+  "order": 3,
+  "version": 4,
+  "locale": "lt-LT",
+  "title": "Kompaso azimutas",
+  "subtitle": "Išmok nustatyti kryptį laipsniais",
+  "difficulty": 2,
+  "estimatedMinutes": 5,
+  "coverImage": {
+    "url": "https://cdn.islik.lt/img/nav/compass-cover.webp",
+    "alt": "Kompasas ant topografinio žemėlapio"
+  },
+  "tags": [
+    "kompasas",
+    "azimutas",
+    "orientavimasis"
+  ],
+  "prerequisites": [
+    "nav-u02-l02"
+  ],
+  "rewards": {
+    "baseXp": 10,
+    "perfectBonusXp": 5,
+    "comboBonusXp": 2,
+    "comboThreshold": 5,
+    "badgeId": null
+  },
+  "heartsEnabled": true,
+  "items": [
+    {
+      "id": "q1",
+      "type": "info_card",
+      "title": "Kas yra azimutas?",
+      "body": "Azimutas – kampas laipsniais nuo šiaurės krypties pagal laikrodžio rodyklę (0–360°).",
+      "image": {
+        "url": "https://cdn.islik.lt/img/nav/azimuth-diagram.svg",
+        "alt": "Azimuto schema"
+      }
+    },
+    {
+      "id": "q2",
+      "type": "single_choice",
+      "prompt": "Koks azimutas rodo tiesiai į rytus?",
+      "image": null,
+      "options": [
+        {
+          "id": "a",
+          "text": "0°"
+        },
+        {
+          "id": "b",
+          "text": "90°"
+        },
+        {
+          "id": "c",
+          "text": "180°"
+        },
+        {
+          "id": "d",
+          "text": "270°"
+        }
+      ],
+      "correctOptionIds": [
+        "b"
+      ],
+      "shuffleOptions": true,
+      "feedback": {
+        "correct": "Teisingai! Rytai – 90°.",
+        "incorrect": "0° – šiaurė, 90° – rytai, 180° – pietys, 270° – vakarai."
+      },
+      "xp": 2
+    },
+    {
+      "id": "q3",
+      "type": "image_choice",
+      "prompt": "Kuriame paveikslėlyje kompasas laikomas teisingai?",
+      "options": [
+        {
+          "id": "a",
+          "image": {
+            "url": "https://cdn.islik.lt/img/nav/hold-ok.webp",
+            "alt": "Kompasas horizontaliai prie krūtinės"
+          }
+        },
+        {
+          "id": "b",
+          "image": {
+            "url": "https://cdn.islik.lt/img/nav/hold-tilted.webp",
+            "alt": "Pakreiptas kompasas"
+          }
+        },
+        {
+          "id": "c",
+          "image": {
+            "url": "https://cdn.islik.lt/img/nav/hold-car.webp",
+            "alt": "Kompasas ant automobilio kapoto"
+          }
+        }
+      ],
+      "correctOptionIds": [
+        "a"
+      ],
+      "feedback": {
+        "correct": "Taip – horizontaliai ir toliau nuo metalo.",
+        "incorrect": "Pakreipta adata strigs, o metalas ir automobilis iškraipo rodmenis."
+      },
+      "xp": 2
+    },
+    {
+      "id": "q4",
+      "type": "order_steps",
+      "prompt": "Sudėliok azimuto nustatymo žingsnius.",
+      "steps": [
+        {
+          "id": "s1",
+          "text": "Nukreipk kompaso krypties rodyklę į tikslą"
+        },
+        {
+          "id": "s2",
+          "text": "Pasuk žiedelį, kol šiaurės žymė sutaps su adata"
+        },
+        {
+          "id": "s3",
+          "text": "Nuskaityk laipsnius ties krypties žyme"
+        }
+      ],
+      "correctOrder": [
+        "s1",
+        "s2",
+        "s3"
+      ],
+      "feedback": {
+        "incorrect": "Pirmiausia nusitaikyk, tik tada suk žiedelį."
+      },
+      "xp": 3
+    },
+    {
+      "id": "q5",
+      "type": "match_pairs",
+      "prompt": "Sujunk kompaso dalį su jos paskirtimi.",
+      "pairs": [
+        {
+          "left": "Magnetinė adata",
+          "right": "Rodo magnetinę šiaurę"
+        },
+        {
+          "left": "Krypties rodyklė",
+          "right": "Nukreipiama į tikslą"
+        },
+        {
+          "left": "Sukamas žiedas",
+          "right": "Nustato azimutą laipsniais"
+        }
+      ],
+      "feedback": {
+        "correct": "Puiku – žinai, kam skirta kiekviena dalis.",
+        "incorrect": "Adata – šiaurė, rodyklė – tikslas, žiedas – laipsniai."
+      },
+      "xp": 3
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "prompt": "Kompaso adata rodo tiksliai į geografinę šiaurę.",
+      "correctAnswer": false,
+      "feedback": {
+        "correct": "Teisingai – adata rodo magnetinę šiaurę, o skirtumas vadinamas magnetine deklinacija.",
+        "incorrect": "Adata rodo magnetinę šiaurę. Skirtumas nuo geografinės šiaurės – magnetinė deklinacija."
+      },
+      "xp": 2
+    },
+    {
+      "id": "q7",
+      "type": "hotspot",
+      "prompt": "Pažymėk šiaurę kompaso skalėje.",
+      "image": {
+        "url": "https://cdn.islik.lt/img/nav/compass-dial.webp",
+        "alt": "Kompaso skalė su laipsniais"
+      },
+      "aspectRatio": 1.0,
+      "targetAreas": [
+        {
+          "x": 0.5,
+          "y": 0.1,
+          "r": 0.1
+        }
+      ],
+      "feedback": {
+        "correct": "Taip – 0° (N) skalės viršuje.",
+        "incorrect": "Šiaurė – 0° arba raidė N skalės viršuje."
+      },
+      "xp": 3
+    },
+    {
+      "id": "q8",
+      "type": "scenario",
+      "prompt": "Miške rūkas, matomumas 20 m. Tavo azimutas – 45°. Ką darai?",
+      "image": {
+        "url": "https://cdn.islik.lt/img/nav/fog-forest.webp",
+        "alt": "Rūkas miške"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": "Einu į matą orientyrą azimutu, tada kartoju",
+          "outcome": "Saugiai išlaikai kryptį."
+        },
+        {
+          "id": "b",
+          "text": "Einu „pagal jausmą“, kompasą tikrinu kas valandą",
+          "outcome": "Žmonės rūke dažnai suka ratu."
+        }
+      ],
+      "correctOptionIds": [
+        "a"
+      ],
+      "xp": 3
+    }
+  ],
+  "sources": [
+    {
+      "title": "Topografijos ir navigacijos mokymo medžiaga",
+      "url": "https://example.lt/saltinis"
+    }
+  ],
+  "review": {
+    "status": "approved",
+    "reviewedBy": "expert-042",
+    "reviewedAt": "2026-10-01"
+  }
+}
