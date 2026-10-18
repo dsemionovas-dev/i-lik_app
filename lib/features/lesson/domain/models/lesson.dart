@@ -35,12 +35,12 @@ class LessonRewards {
   }
 
   Json toJson() => {
-        'baseXp': baseXp,
-        'perfectBonusXp': perfectBonusXp,
-        'comboBonusXp': comboBonusXp,
-        'comboThreshold': comboThreshold,
-        'badgeId': badgeId,
-      };
+    'baseXp': baseXp,
+    'perfectBonusXp': perfectBonusXp,
+    'comboBonusXp': comboBonusXp,
+    'comboThreshold': comboThreshold,
+    'badgeId': badgeId,
+  };
 }
 
 class LessonSource {
@@ -49,10 +49,7 @@ class LessonSource {
   final String title;
   final String url;
 
-  factory LessonSource.fromJson(Json json) => LessonSource(
-        title: json['title'] as String,
-        url: json['url'] as String,
-      );
+  factory LessonSource.fromJson(Json json) => LessonSource(title: json['title'] as String, url: json['url'] as String);
 
   Json toJson() => {'title': title, 'url': url};
 }
@@ -75,20 +72,19 @@ class LessonReview {
   };
 
   factory LessonReview.fromJson(Json json) => LessonReview(
-        status: _statusKeys.entries
-            .firstWhere((e) => e.value == json['status'],
-                orElse: () => const MapEntry(ReviewStatus.draft, 'draft'))
-            .key,
-        reviewedBy: json['reviewedBy'] as String?,
-        reviewedAt: parseDate(json['reviewedAt']),
-      );
+    status: _statusKeys.entries
+        .firstWhere((e) => e.value == json['status'], orElse: () => const MapEntry(ReviewStatus.draft, 'draft'))
+        .key,
+    reviewedBy: json['reviewedBy'] as String?,
+    reviewedAt: parseDate(json['reviewedAt']),
+  );
 
   Json toJson() => {
-        'status': _statusKeys[status],
-        'reviewedBy': reviewedBy,
-        // Tik data, kaip CMS eksporte (YYYY-MM-DD).
-        'reviewedAt': reviewedAt?.toIso8601String().substring(0, 10),
-      };
+    'status': _statusKeys[status],
+    'reviewedBy': reviewedBy,
+    // Tik data, kaip CMS eksporte (YYYY-MM-DD).
+    'reviewedAt': reviewedAt?.toIso8601String().substring(0, 10),
+  };
 }
 
 /// Viena pamoka – tiksliai atitinka PRD 6 skyriaus JSON schemą.
@@ -136,54 +132,51 @@ class Lesson {
   final LessonReview? review;
 
   /// Užduotys, kurias ši programėlės versija moka parodyti.
-  List<LessonItem> get playableItems =>
-      items.where((i) => i is! UnsupportedItem).toList(growable: false);
+  List<LessonItem> get playableItems => items.where((i) => i is! UnsupportedItem).toList(growable: false);
 
   int get gradedItemCount => playableItems.where((i) => i.isGraded).length;
 
   factory Lesson.fromJson(Json json) => Lesson(
-        schemaVersion: json['schemaVersion'] as String? ?? '1.0',
-        id: json['id'] as String,
-        courseId: json['courseId'] as String,
-        unitId: json['unitId'] as String,
-        order: json['order'] as int,
-        version: json['version'] as int,
-        locale: json['locale'] as String? ?? 'lt-LT',
-        title: json['title'] as String,
-        subtitle: json['subtitle'] as String?,
-        difficulty: json['difficulty'] as int? ?? 1,
-        estimatedMinutes: json['estimatedMinutes'] as int? ?? 5,
-        coverImage: MediaImage.maybeFromJson(json['coverImage']),
-        tags: parseStringList(json['tags']),
-        prerequisites: parseStringList(json['prerequisites']),
-        rewards: LessonRewards.fromJson(json['rewards']),
-        heartsEnabled: json['heartsEnabled'] as bool? ?? true,
-        items: parseList(json['items'], LessonItem.fromJson),
-        sources: parseList(json['sources'], LessonSource.fromJson),
-        review: json['review'] == null
-            ? null
-            : LessonReview.fromJson(json['review'] as Json),
-      );
+    schemaVersion: json['schemaVersion'] as String? ?? '1.0',
+    id: json['id'] as String,
+    courseId: json['courseId'] as String,
+    unitId: json['unitId'] as String,
+    order: json['order'] as int,
+    version: json['version'] as int,
+    locale: json['locale'] as String? ?? 'lt-LT',
+    title: json['title'] as String,
+    subtitle: json['subtitle'] as String?,
+    difficulty: json['difficulty'] as int? ?? 1,
+    estimatedMinutes: json['estimatedMinutes'] as int? ?? 5,
+    coverImage: MediaImage.maybeFromJson(json['coverImage']),
+    tags: parseStringList(json['tags']),
+    prerequisites: parseStringList(json['prerequisites']),
+    rewards: LessonRewards.fromJson(json['rewards']),
+    heartsEnabled: json['heartsEnabled'] as bool? ?? true,
+    items: parseList(json['items'], LessonItem.fromJson),
+    sources: parseList(json['sources'], LessonSource.fromJson),
+    review: json['review'] == null ? null : LessonReview.fromJson(json['review'] as Json),
+  );
 
   Json toJson() => {
-        'schemaVersion': schemaVersion,
-        'id': id,
-        'courseId': courseId,
-        'unitId': unitId,
-        'order': order,
-        'version': version,
-        'locale': locale,
-        'title': title,
-        'subtitle': subtitle,
-        'difficulty': difficulty,
-        'estimatedMinutes': estimatedMinutes,
-        'coverImage': coverImage?.toJson(),
-        'tags': tags,
-        'prerequisites': prerequisites,
-        'rewards': rewards.toJson(),
-        'heartsEnabled': heartsEnabled,
-        'items': items.map((i) => i.toJson()).toList(),
-        'sources': sources.map((s) => s.toJson()).toList(),
-        'review': review?.toJson(),
-      };
+    'schemaVersion': schemaVersion,
+    'id': id,
+    'courseId': courseId,
+    'unitId': unitId,
+    'order': order,
+    'version': version,
+    'locale': locale,
+    'title': title,
+    'subtitle': subtitle,
+    'difficulty': difficulty,
+    'estimatedMinutes': estimatedMinutes,
+    'coverImage': coverImage?.toJson(),
+    'tags': tags,
+    'prerequisites': prerequisites,
+    'rewards': rewards.toJson(),
+    'heartsEnabled': heartsEnabled,
+    'items': items.map((i) => i.toJson()).toList(),
+    'sources': sources.map((s) => s.toJson()).toList(),
+    'review': review?.toJson(),
+  };
 }

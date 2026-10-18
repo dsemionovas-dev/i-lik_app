@@ -43,61 +43,54 @@ class LessonItemView extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     return switch (item) {
       InfoCardItem(:final title, :final body) => Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 12,
-          children: [Text(title, style: text.headlineSmall), Text(body, style: text.bodyLarge)],
-        ),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 12,
+        children: [
+          Text(title, style: text.headlineSmall),
+          Text(body, style: text.bodyLarge),
+        ],
+      ),
       final ChoiceItem choice when choice.choiceType == ChoiceType.image => ImageChoiceView(
-          item: choice,
-          selectedIds: selectedIds,
-          locked: locked,
-          onSelected: onToggleOption,
-        ),
+        item: choice,
+        selectedIds: selectedIds,
+        locked: locked,
+        onSelected: onToggleOption,
+      ),
       final ChoiceItem choice when choice.choiceType == ChoiceType.scenario => ScenarioView(
-          item: choice,
-          selectedIds: selectedIds,
-          locked: locked,
-          onSelected: onToggleOption,
-        ),
+        item: choice,
+        selectedIds: selectedIds,
+        locked: locked,
+        onSelected: onToggleOption,
+      ),
       ChoiceItem(:final prompt, :final options) => Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: 8,
-          children: [
-            Text(prompt, style: text.titleLarge),
-            const SizedBox(height: 8),
-            for (final o in options)
-              _OptionTile(
-                label: o.text ?? o.image?.alt ?? o.id,
-                selected: selectedIds.contains(o.id),
-                onTap: locked ? null : () => onToggleOption(o.id),
-              ),
-          ],
-        ),
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 8,
+        children: [
+          Text(prompt, style: text.titleLarge),
+          const SizedBox(height: 8),
+          for (final o in options)
+            _OptionTile(
+              label: o.text ?? o.image?.alt ?? o.id,
+              selected: selectedIds.contains(o.id),
+              onTap: locked ? null : () => onToggleOption(o.id),
+            ),
+        ],
+      ),
       // Raktas pagal id: dvi iš eilės einančios užduotys nesidalija būsena.
       final OrderStepsItem steps => OrderStepsView(
-          key: ValueKey(steps.id),
-          item: steps,
-          locked: locked,
-          onOrderChanged: onOrderChanged,
-        ),
+        key: ValueKey(steps.id),
+        item: steps,
+        locked: locked,
+        onOrderChanged: onOrderChanged,
+      ),
       final MatchPairsItem pairs => MatchPairsView(
-          key: ValueKey(pairs.id),
-          item: pairs,
-          locked: locked,
-          onMatchesChanged: onMatchesChanged,
-        ),
-      final TrueFalseItem tf => TrueFalseView(
-          item: tf,
-          answer: trueFalseAnswer,
-          locked: locked,
-          onAnswer: onTrueFalse,
-        ),
-      final HotspotItem hotspot => HotspotView(
-          item: hotspot,
-          tap: hotspotTap,
-          locked: locked,
-          onTap: onHotspotTap,
-        ),
+        key: ValueKey(pairs.id),
+        item: pairs,
+        locked: locked,
+        onMatchesChanged: onMatchesChanged,
+      ),
+      final TrueFalseItem tf => TrueFalseView(item: tf, answer: trueFalseAnswer, locked: locked, onAnswer: onTrueFalse),
+      final HotspotItem hotspot => HotspotView(item: hotspot, tap: hotspotTap, locked: locked, onTap: onHotspotTap),
       UnsupportedItem() => const SizedBox.shrink(),
     };
   }

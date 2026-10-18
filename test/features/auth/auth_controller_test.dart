@@ -93,8 +93,8 @@ void main() {
     });
 
     test('blogas kodo formatas ar slaptažodis – kodas neišnaudojamas', () async {
-      Future<bool> reset(String code, String pass, String confirm) => controller()
-          .resetPassword(email: 'jonas@pastas.lt', code: code, password: pass, confirmation: confirm);
+      Future<bool> reset(String code, String pass, String confirm) =>
+          controller().resetPassword(email: 'jonas@pastas.lt', code: code, password: pass, confirmation: confirm);
 
       expect(await reset('12a456', 'Kompasas42', 'Kompasas42'), isFalse);
       expect(state().error.toString(), 'Įveskite 6 skaitmenų kodą iš laiško.');
@@ -105,7 +105,12 @@ void main() {
 
     test('neteisingas kodas – klaida, slaptažodis nekeičiamas', () async {
       expect(
-        await controller().resetPassword(email: 'jonas@pastas.lt', code: '000000', password: 'Kompasas42', confirmation: 'Kompasas42'),
+        await controller().resetPassword(
+          email: 'jonas@pastas.lt',
+          code: '000000',
+          password: 'Kompasas42',
+          confirmation: 'Kompasas42',
+        ),
         isFalse,
       );
       expect(state().error.toString(), contains('Kodas neteisingas'));
@@ -114,7 +119,12 @@ void main() {
 
     test('teisingas kodas – prisijungiama ir nustatomas slaptažodis', () async {
       expect(
-        await controller().resetPassword(email: 'jonas@pastas.lt', code: '123456', password: 'Kompasas42', confirmation: 'Kompasas42'),
+        await controller().resetPassword(
+          email: 'jonas@pastas.lt',
+          code: '123456',
+          password: 'Kompasas42',
+          confirmation: 'Kompasas42',
+        ),
         isTrue,
       );
       expect(repo.calls, ['verify:123456', 'setPassword']);

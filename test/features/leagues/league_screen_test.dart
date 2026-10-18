@@ -14,15 +14,17 @@ import '../../helpers/fakes.dart';
 final _now = DateTime.utc(2026, 10, 15, 17);
 
 Future<void> _pump(WidgetTester tester, LeagueRepository? repo) async {
-  await tester.pumpWidget(ProviderScope(
-    // Be automatinio Riverpod kartojimo – tikrinam „patraukti žemyn“.
-    retry: (_, _) => null,
-    overrides: [
-      leagueRepositoryProvider.overrideWithValue(repo),
-      authRepositoryProvider.overrideWithValue(FakeAuthRepository(user: const AppUser(id: 'u1'))),
-    ],
-    child: MaterialApp(home: LeagueScreen(now: () => _now)),
-  ));
+  await tester.pumpWidget(
+    ProviderScope(
+      // Be automatinio Riverpod kartojimo – tikrinam „patraukti žemyn“.
+      retry: (_, _) => null,
+      overrides: [
+        leagueRepositoryProvider.overrideWithValue(repo),
+        authRepositoryProvider.overrideWithValue(FakeAuthRepository(user: const AppUser(id: 'u1'))),
+      ],
+      child: MaterialApp(home: LeagueScreen(now: () => _now)),
+    ),
+  );
   await tester.pumpAndSettle();
 }
 
@@ -62,12 +64,20 @@ void main() {
       (LeagueOutcome.demoted, 'Praėjusią savaitę – 29 vieta. Nukritai į „Žygeivis“ lygą.'),
       (LeagueOutcome.stayed, 'Praėjusią savaitę – 12 vieta. Lieki „Žygeivis“ lygoje.'),
     ]) {
-      final rank = switch (outcome) { LeagueOutcome.promoted => 1, LeagueOutcome.demoted => 29, _ => 12 };
+      final rank = switch (outcome) {
+        LeagueOutcome.promoted => 1,
+        LeagueOutcome.demoted => 29,
+        _ => 12,
+      };
       await _pump(
         tester,
-        FakeLeagueRepository(leagueOf([10],
+        FakeLeagueRepository(
+          leagueOf(
+            [10],
             meAt: 1,
-            lastWeek: LeagueLastWeek(tier: 2, tierName: 'Stovyklautojas', finalRank: rank, outcome: outcome))),
+            lastWeek: LeagueLastWeek(tier: 2, tierName: 'Stovyklautojas', finalRank: rank, outcome: outcome),
+          ),
+        ),
       );
       expect(find.text(text), findsOneWidget);
     }

@@ -15,10 +15,7 @@ class HomeScreen extends StatelessWidget {
       body: PlaceholderBody(
         title: 'Kita pamoka: Kompaso azimutas',
         children: [
-          FilledButton(
-            onPressed: () => context.push(Routes.lesson('nav-u02-l03')),
-            child: const Text('PRADĖTI'),
-          ),
+          FilledButton(onPressed: () => context.push(Routes.lesson('nav-u02-l03')), child: const Text('PRADĖTI')),
         ],
       ),
     );

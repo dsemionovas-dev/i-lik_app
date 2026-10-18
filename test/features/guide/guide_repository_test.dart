@@ -20,8 +20,12 @@ void main() {
   late FakeGuideRemote remote;
   late MapAssetBundle assets;
 
-  GuideRepository repo({bool online = true}) =>
-      GuideRepository(cache: cache, remote: online ? remote : null, bundle: assets, timeout: const Duration(milliseconds: 50));
+  GuideRepository repo({bool online = true}) => GuideRepository(
+    cache: cache,
+    remote: online ? remote : null,
+    bundle: assets,
+    timeout: const Duration(milliseconds: 50),
+  );
 
   setUp(() {
     cache = InMemoryGuideCache();
@@ -87,7 +91,12 @@ void main() {
       expect(await repo().fetchUpdate(current), isNull);
       expect(await repo(online: false).fetchUpdate(current), isNull);
 
-      final hanging = GuideRepository(cache: cache, remote: _HangingRemote(), bundle: assets, timeout: const Duration(milliseconds: 20));
+      final hanging = GuideRepository(
+        cache: cache,
+        remote: _HangingRemote(),
+        bundle: assets,
+        timeout: const Duration(milliseconds: 20),
+      );
       expect(await hanging.fetchUpdate(current), isNull);
     });
 

@@ -34,11 +34,11 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
   }
 
   String? get _contextLabel => switch ((widget.lessonId, widget.itemId, widget.guideCardId)) {
-        (final lesson?, final item?, _) => 'Pamoka $lesson, užduotis $item',
-        (final lesson?, null, _) => 'Pamoka $lesson',
-        (null, _, final card?) => 'Gido atmintinė $card',
-        _ => null,
-      };
+    (final lesson?, final item?, _) => 'Pamoka $lesson, užduotis $item',
+    (final lesson?, null, _) => 'Pamoka $lesson',
+    (null, _, final card?) => 'Gido atmintinė $card',
+    _ => null,
+  };
 
   Future<void> _send() async {
     setState(() {
@@ -46,7 +46,9 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
       _error = null;
     });
     try {
-      final delivery = await ref.read(reportServiceProvider).submit(
+      final delivery = await ref
+          .read(reportServiceProvider)
+          .submit(
             category: _category,
             message: _message.text,
             lessonId: widget.lessonId,
@@ -54,13 +56,15 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
             guideCardId: widget.guideCardId,
           );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(switch (delivery) {
-          ReportDelivery.sent => 'Ačiū! Pranešimas išsiųstas.',
-          ReportDelivery.queued => 'Ačiū! Pranešimas išsaugotas ir bus išsiųstas, kai atsiras ryšys.',
-          ReportDelivery.localOnly => 'Ačiū! Pranešimas išsaugotas įrenginyje.',
-        }),
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(switch (delivery) {
+            ReportDelivery.sent => 'Ačiū! Pranešimas išsiųstas.',
+            ReportDelivery.queued => 'Ačiū! Pranešimas išsaugotas ir bus išsiųstas, kai atsiras ryšys.',
+            ReportDelivery.localOnly => 'Ačiū! Pranešimas išsaugotas įrenginyje.',
+          }),
+        ),
+      );
       context.canPop() ? context.pop() : context.go(Routes.home);
     } on ReportValidationError catch (e) {
       setState(() => _error = e.message);
@@ -129,7 +133,11 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
           if (_error != null)
             Padding(
               padding: const EdgeInsets.only(top: 12),
-              child: Text(_error!, key: const ValueKey('report-error'), style: TextStyle(color: theme.colorScheme.error)),
+              child: Text(
+                _error!,
+                key: const ValueKey('report-error'),
+                style: TextStyle(color: theme.colorScheme.error),
+              ),
             ),
           const SizedBox(height: 16),
           FilledButton.icon(

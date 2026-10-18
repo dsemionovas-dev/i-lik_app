@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
 IconData badgeIcon(String key) => switch (key) {
-      'flag' => Icons.flag,
-      'explore' => Icons.explore,
-      'hiking' => Icons.hiking,
-      'star' => Icons.star,
-      'fire' => Icons.local_fire_department,
-      'bolt' => Icons.bolt,
-      'compass' => Icons.navigation,
-      'fire_master' => Icons.whatshot,
-      _ => Icons.military_tech,
-    };
+  'flag' => Icons.flag,
+  'explore' => Icons.explore,
+  'hiking' => Icons.hiking,
+  'star' => Icons.star,
+  'fire' => Icons.local_fire_department,
+  'bolt' => Icons.bolt,
+  'compass' => Icons.navigation,
+  'fire_master' => Icons.whatshot,
+  _ => Icons.military_tech,
+};
 
 /// Apvalus ženklelis: gautas – spalvotas, negautas – pilkas.
 class BadgeMedal extends StatelessWidget {
@@ -31,11 +31,7 @@ class BadgeMedal extends StatelessWidget {
         color: earned ? scheme.tertiaryContainer : scheme.surfaceContainerHighest,
         border: Border.all(color: earned ? scheme.tertiary : scheme.outlineVariant, width: 2),
       ),
-      child: Icon(
-        badgeIcon(icon),
-        size: size * 0.5,
-        color: earned ? scheme.onTertiaryContainer : scheme.outline,
-      ),
+      child: Icon(badgeIcon(icon), size: size * 0.5, color: earned ? scheme.onTertiaryContainer : scheme.outline),
     );
   }
 }

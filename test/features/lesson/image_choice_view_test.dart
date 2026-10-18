@@ -8,40 +8,42 @@ const _item = ChoiceItem(
   choiceType: ChoiceType.image,
   prompt: 'Kuriame paveikslėlyje kompasas laikomas teisingai?',
   options: [
-    QuestionOption(id: 'a', image: MediaImage(url: 'https://cdn.test/a.webp', alt: 'Horizontaliai')),
-    QuestionOption(id: 'b', image: MediaImage(url: 'https://cdn.test/b.webp', alt: 'Pakreiptas')),
-    QuestionOption(id: 'c', image: MediaImage(url: 'https://cdn.test/c.webp', alt: 'Ant kapoto')),
+    QuestionOption(
+      id: 'a',
+      image: MediaImage(url: 'https://cdn.test/a.webp', alt: 'Horizontaliai'),
+    ),
+    QuestionOption(
+      id: 'b',
+      image: MediaImage(url: 'https://cdn.test/b.webp', alt: 'Pakreiptas'),
+    ),
+    QuestionOption(
+      id: 'c',
+      image: MediaImage(url: 'https://cdn.test/c.webp', alt: 'Ant kapoto'),
+    ),
   ],
   correctOptionIds: ['a'],
 );
 
-Future<List<String>> _pump(
-  WidgetTester tester, {
-  Set<String> selected = const {},
-  bool locked = false,
-}) async {
+Future<List<String>> _pump(WidgetTester tester, {Set<String> selected = const {}, bool locked = false}) async {
   final taps = <String>[];
-  await tester.pumpWidget(MaterialApp(
-    home: Scaffold(
-      body: SingleChildScrollView(
-        child: ImageChoiceView(
-          item: _item,
-          selectedIds: selected,
-          locked: locked,
-          onSelected: taps.add,
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Scaffold(
+        body: SingleChildScrollView(
+          child: ImageChoiceView(item: _item, selectedIds: selected, locked: locked, onSelected: taps.add),
         ),
       ),
     ),
-  ));
+  );
   await tester.pumpAndSettle();
   return taps;
 }
 
 /// Ženklelis (piktograma) konkrečioje paveikslėlio kortelėje.
 Finder _badgeOn(String alt, IconData icon) => find.descendant(
-      of: find.ancestor(of: find.text(alt), matching: find.byType(InkWell)),
-      matching: find.byIcon(icon),
-    );
+  of: find.ancestor(of: find.text(alt), matching: find.byType(InkWell)),
+  matching: find.byIcon(icon),
+);
 
 void main() {
   testWidgets('rodo klausimą ir visus variantus; nepavykus įkelti – piktograma', (tester) async {
@@ -71,8 +73,7 @@ void main() {
     );
   });
 
-  testWidgets('po neteisingo atsakymo: klaida pažymėta, teisingas parodytas, paspaudimai ignoruojami',
-      (tester) async {
+  testWidgets('po neteisingo atsakymo: klaida pažymėta, teisingas parodytas, paspaudimai ignoruojami', (tester) async {
     final taps = await _pump(tester, selected: {'b'}, locked: true);
 
     expect(_badgeOn('Pakreiptas', Icons.cancel), findsOneWidget);

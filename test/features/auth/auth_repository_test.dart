@@ -57,12 +57,8 @@ void main() {
     late http.Response Function(http.Request) respond;
     late SupabaseAuthRepository repo;
 
-    http.Response json(http.Request r, Object body, [int status = 200]) => http.Response(
-          jsonEncode(body),
-          status,
-          headers: _apiHeaders,
-          request: r,
-        );
+    http.Response json(http.Request r, Object body, [int status = 200]) =>
+        http.Response(jsonEncode(body), status, headers: _apiHeaders, request: r);
 
     setUp(() {
       requests = [];
@@ -110,7 +106,8 @@ void main() {
       respond = (r) => json(r, _session(anonymous: true));
       await repo.ensureSignedIn();
 
-      respond = (r) => json(r, {...(_session(anonymous: true)['user']! as Map<String, Object?>), 'new_email': 'jonas@pastas.lt'});
+      respond = (r) =>
+          json(r, {...(_session(anonymous: true)['user']! as Map<String, Object?>), 'new_email': 'jonas@pastas.lt'});
       await repo.linkEmail(' jonas@pastas.lt ');
 
       final put = requests.last;
@@ -144,9 +141,9 @@ void main() {
       expect(repo.currentUser!.needsPassword, isTrue);
 
       respond = (r) => json(r, {
-            ...(_session(anonymous: false, email: 'jonas@pastas.lt', confirmed: true)['user']! as Map<String, Object?>),
-            'user_metadata': {'password_set': true},
-          });
+        ...(_session(anonymous: false, email: 'jonas@pastas.lt', confirmed: true)['user']! as Map<String, Object?>),
+        'user_metadata': {'password_set': true},
+      });
       await repo.setPassword('Kompasas42');
 
       final put = requests.last;
@@ -159,7 +156,8 @@ void main() {
     test('laukiamas el. pašto patvirtinimas matomas kaip pendingEmail', () async {
       respond = (r) => json(r, _session(anonymous: true));
       await repo.ensureSignedIn();
-      respond = (r) => json(r, {...(_session(anonymous: true)['user']! as Map<String, Object?>), 'new_email': 'jonas@pastas.lt'});
+      respond = (r) =>
+          json(r, {...(_session(anonymous: true)['user']! as Map<String, Object?>), 'new_email': 'jonas@pastas.lt'});
       await repo.linkEmail('jonas@pastas.lt');
 
       expect(repo.currentUser!.pendingEmail, 'jonas@pastas.lt');
@@ -179,7 +177,9 @@ void main() {
       respond = (r) => json(r, {'code': 'same_password', 'msg': 'New password should be different'}, 422);
       expect(
         repo.setPassword('Kompasas42'),
-        throwsA(isA<AuthFailure>().having((e) => e.message, 'message', 'Naujas slaptažodis turi skirtis nuo dabartinio.')),
+        throwsA(
+          isA<AuthFailure>().having((e) => e.message, 'message', 'Naujas slaptažodis turi skirtis nuo dabartinio.'),
+        ),
       );
     });
 
@@ -204,9 +204,9 @@ void main() {
       expect(user.email, 'jonas@pastas.lt');
 
       respond = (r) => json(r, {
-            ...(_session(anonymous: false, email: 'jonas@pastas.lt', confirmed: true)['user']! as Map<String, Object?>),
-            'user_metadata': {'password_set': true},
-          });
+        ...(_session(anonymous: false, email: 'jonas@pastas.lt', confirmed: true)['user']! as Map<String, Object?>),
+        'user_metadata': {'password_set': true},
+      });
       await repo.setPassword('Kompasas42');
       expect(requests.last.method, 'PUT');
     });
@@ -215,7 +215,13 @@ void main() {
       respond = (r) => json(r, {'code': 'otp_expired', 'msg': 'Token has expired or is invalid'}, 403);
       expect(
         repo.verifyPasswordResetCode('jonas@pastas.lt', '000000'),
-        throwsA(isA<AuthFailure>().having((e) => e.message, 'message', 'Kodas neteisingas arba nebegalioja. Paprašykite naujo.')),
+        throwsA(
+          isA<AuthFailure>().having(
+            (e) => e.message,
+            'message',
+            'Kodas neteisingas arba nebegalioja. Paprašykite naujo.',
+          ),
+        ),
       );
     });
 

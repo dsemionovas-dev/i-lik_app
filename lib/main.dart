@@ -13,10 +13,5 @@ Future<void> main() async {
   // kad provideriai jas galėtų skaityti sinchroniškai.
   final (prefs, _) = await (SharedPreferences.getInstance(), initSupabase()).wait;
 
-  runApp(
-    ProviderScope(
-      overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
-      child: const IslikApp(),
-    ),
-  );
+  runApp(ProviderScope(overrides: [sharedPreferencesProvider.overrideWithValue(prefs)], child: const IslikApp()));
 }

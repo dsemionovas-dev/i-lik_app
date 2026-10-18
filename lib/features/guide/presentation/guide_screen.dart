@@ -138,7 +138,10 @@ class _EmergencyCard extends ConsumerWidget {
       color: scheme.errorContainer,
       child: ListTile(
         leading: Icon(Icons.sos, color: scheme.onErrorContainer, size: 32),
-        title: Text('Skubi pagalba – 112', style: TextStyle(color: scheme.onErrorContainer, fontWeight: FontWeight.bold)),
+        title: Text(
+          'Skubi pagalba – 112',
+          style: TextStyle(color: scheme.onErrorContainer, fontWeight: FontWeight.bold),
+        ),
         subtitle: Text('Nemokamai, visoje ES', style: TextStyle(color: scheme.onErrorContainer)),
         trailing: FilledButton.icon(
           key: const ValueKey('call-112'),

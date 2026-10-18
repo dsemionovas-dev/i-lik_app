@@ -5,12 +5,12 @@ void main() {
   final t0 = DateTime.utc(2026, 10, 17, 9);
 
   UserProgress fresh() => UserProgress(
-        userId: 'u1',
-        lessonId: 'nav-u02-l03',
-        lessonVersion: 4,
-        status: LessonProgressStatus.inProgress,
-        updatedAt: t0,
-      );
+    userId: 'u1',
+    lessonId: 'nav-u02-l03',
+    lessonVersion: 4,
+    status: LessonProgressStatus.inProgress,
+    updatedAt: t0,
+  );
 
   test('žvaigždutės pagal tikslumą', () {
     expect(UserProgress.starsForAccuracy(0.5), 0);

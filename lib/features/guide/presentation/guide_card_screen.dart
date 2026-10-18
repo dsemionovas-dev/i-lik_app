@@ -98,10 +98,7 @@ class _Block extends ConsumerWidget {
       case GuideBlockKind.warning:
         return Container(
           padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.errorContainer,
-            borderRadius: BorderRadius.circular(12),
-          ),
+          decoration: BoxDecoration(color: theme.colorScheme.errorContainer, borderRadius: BorderRadius.circular(12)),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: 12,
@@ -136,7 +133,10 @@ class _Block extends ConsumerWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 10,
-                children: [Text('•', style: body), Expanded(child: Text(item, style: body))],
+                children: [
+                  Text('•', style: body),
+                  Expanded(child: Text(item, style: body)),
+                ],
               ),
           ],
         );

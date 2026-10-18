@@ -63,21 +63,19 @@ class _LessonRunnerState extends ConsumerState<_LessonRunner> {
   bool get _needsAnswer => _item.isGraded;
 
   bool get _hasAnswer => switch (_item) {
-        ChoiceItem() => _selected.isNotEmpty,
-        OrderStepsItem() => _order.isNotEmpty,
-        // Tikrinti galima tik sujungus visas poras.
-        MatchPairsItem(:final pairs) => _matches.length == pairs.length,
-        TrueFalseItem() => _trueFalse != null,
-        HotspotItem() => _hotspot != null,
-        _ => false,
-      };
+    ChoiceItem() => _selected.isNotEmpty,
+    OrderStepsItem() => _order.isNotEmpty,
+    // Tikrinti galima tik sujungus visas poras.
+    MatchPairsItem(:final pairs) => _matches.length == pairs.length,
+    TrueFalseItem() => _trueFalse != null,
+    HotspotItem() => _hotspot != null,
+    _ => false,
+  };
 
   void _toggle(String optionId) {
     final item = _item as ChoiceItem;
     setState(() {
-      _selected = item.allowsMultiple
-          ? ({..._selected}..toggle(optionId))
-          : {optionId};
+      _selected = item.allowsMultiple ? ({..._selected}..toggle(optionId)) : {optionId};
     });
   }
 
@@ -115,11 +113,7 @@ class _LessonRunnerState extends ConsumerState<_LessonRunner> {
       lessonId: widget.lesson.id,
       correctCount: _answers.where((a) => a).length,
       gradedCount: _answers.length,
-      xpEarned: LessonResult.calculateXp(
-        lesson: widget.lesson,
-        answers: _answers,
-        gradedItems: _gradedItems,
-      ),
+      xpEarned: LessonResult.calculateXp(lesson: widget.lesson, answers: _answers, gradedItems: _gradedItems),
       duration: DateTime.now().difference(_startedAt),
     );
     // Vietinis įrašas + siuntimas fone; rezultatų ekranas nelaukia tinklo.
@@ -156,8 +150,7 @@ class _LessonRunnerState extends ConsumerState<_LessonRunner> {
       OrderStepsItem(:final feedback) ||
       MatchPairsItem(:final feedback) ||
       TrueFalseItem(:final feedback) ||
-      HotspotItem(:final feedback) =>
-        feedback,
+      HotspotItem(:final feedback) => feedback,
       _ => ItemFeedback.empty,
     };
 
@@ -207,15 +200,9 @@ class _LessonRunnerState extends ConsumerState<_LessonRunner> {
                   ),
                 const SizedBox(height: 12),
                 if (_needsAnswer && !checked)
-                  FilledButton(
-                    onPressed: _hasAnswer ? _check : null,
-                    child: const Text('TIKRINTI'),
-                  )
+                  FilledButton(onPressed: _hasAnswer ? _check : null, child: const Text('TIKRINTI'))
                 else
-                  FilledButton(
-                    onPressed: _next,
-                    child: Text(item is InfoCardItem ? 'SUPRATAU' : 'TĘSTI'),
-                  ),
+                  FilledButton(onPressed: _next, child: Text(item is InfoCardItem ? 'SUPRATAU' : 'TĘSTI')),
               ],
             ),
           ),

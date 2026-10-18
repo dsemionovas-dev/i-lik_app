@@ -30,15 +30,17 @@ class LeagueScreen extends ConsumerWidget {
         child: switch (league) {
           AsyncData(value: final standing?) => _LeagueBody(standing: standing, now: (now ?? DateTime.now)()),
           // ListView – kad veiktų „patraukti žemyn“.
-          AsyncData() => ListView(children: const [
-              _Message(icon: Icons.cloud_off, text: 'Lygos veikia tik prisijungus prie serverio.'),
-            ]),
-          AsyncError() => ListView(children: const [
+          AsyncData() => ListView(
+            children: const [_Message(icon: Icons.cloud_off, text: 'Lygos veikia tik prisijungus prie serverio.')],
+          ),
+          AsyncError() => ListView(
+            children: const [
               _Message(
                 icon: Icons.wifi_off,
                 text: 'Nepavyko įkelti lygos. Patikrinkite ryšį ir patraukite žemyn, kad bandytumėte dar kartą.',
               ),
-            ]),
+            ],
+          ),
           _ => const Center(child: CircularProgressIndicator()),
         },
       ),
@@ -148,7 +150,10 @@ class _ZoneDivider extends StatelessWidget {
         spacing: 8,
         children: [
           Icon(up ? Icons.arrow_upward : Icons.arrow_downward, size: 16, color: color),
-          Text(label, style: TextStyle(color: color, fontWeight: FontWeight.w600)),
+          Text(
+            label,
+            style: TextStyle(color: color, fontWeight: FontWeight.w600),
+          ),
           Expanded(child: Divider(color: color)),
         ],
       ),
@@ -167,20 +172,20 @@ class _LastWeekBanner extends StatelessWidget {
     final theme = Theme.of(context);
     final (icon, color, text) = switch (last.outcome) {
       LeagueOutcome.promoted => (
-          Icons.trending_up,
-          theme.correctColor,
-          'Praėjusią savaitę – ${last.finalRank} vieta. Pakilai į „$currentTierName“ lygą!',
-        ),
+        Icons.trending_up,
+        theme.correctColor,
+        'Praėjusią savaitę – ${last.finalRank} vieta. Pakilai į „$currentTierName“ lygą!',
+      ),
       LeagueOutcome.demoted => (
-          Icons.trending_down,
-          theme.incorrectColor,
-          'Praėjusią savaitę – ${last.finalRank} vieta. Nukritai į „$currentTierName“ lygą.',
-        ),
+        Icons.trending_down,
+        theme.incorrectColor,
+        'Praėjusią savaitę – ${last.finalRank} vieta. Nukritai į „$currentTierName“ lygą.',
+      ),
       LeagueOutcome.stayed => (
-          Icons.trending_flat,
-          theme.colorScheme.onSurfaceVariant,
-          'Praėjusią savaitę – ${last.finalRank} vieta. Lieki „$currentTierName“ lygoje.',
-        ),
+        Icons.trending_flat,
+        theme.colorScheme.onSurfaceVariant,
+        'Praėjusią savaitę – ${last.finalRank} vieta. Lieki „$currentTierName“ lygoje.',
+      ),
     };
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

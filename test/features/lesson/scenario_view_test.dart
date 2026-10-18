@@ -23,32 +23,29 @@ const _item = ChoiceItem(
   correctOptionIds: ['a'],
 );
 
-Future<List<String>> _pump(
-  WidgetTester tester, {
-  Set<String> selected = const {},
-  bool locked = false,
-}) async {
+Future<List<String>> _pump(WidgetTester tester, {Set<String> selected = const {}, bool locked = false}) async {
   final taps = <String>[];
-  await tester.pumpWidget(MaterialApp(
-    home: Scaffold(
-      body: SingleChildScrollView(
-        child: ScenarioView(item: _item, selectedIds: selected, locked: locked, onSelected: taps.add),
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Scaffold(
+        body: SingleChildScrollView(
+          child: ScenarioView(item: _item, selectedIds: selected, locked: locked, onSelected: taps.add),
+        ),
       ),
     ),
-  ));
+  );
   await tester.pumpAndSettle();
   return taps;
 }
 
 /// Piktograma konkretaus kelio kortelėje.
 Finder _iconOn(String text, IconData icon) => find.descendant(
-      of: find.ancestor(of: find.text(text), matching: find.byType(InkWell)),
-      matching: find.byIcon(icon),
-    );
+  of: find.ancestor(of: find.text(text), matching: find.byType(InkWell)),
+  matching: find.byIcon(icon),
+);
 
-double _opacityOf(WidgetTester tester, String text) => tester
-    .widget<Opacity>(find.ancestor(of: find.text(text), matching: find.byType(Opacity)).first)
-    .opacity;
+double _opacityOf(WidgetTester tester, String text) =>
+    tester.widget<Opacity>(find.ancestor(of: find.text(text), matching: find.byType(Opacity)).first).opacity;
 
 void main() {
   testWidgets('rodo situaciją, paveikslėlį ir kelius; pasekmės paslėptos', (tester) async {
@@ -93,8 +90,9 @@ void main() {
     expect(_opacityOf(tester, _safe), 1.0);
   });
 
-  testWidgets('klaidingas kelias: raudona su pasekme, teisingas kelias parodomas, paspaudimai ignoruojami',
-      (tester) async {
+  testWidgets('klaidingas kelias: raudona su pasekme, teisingas kelias parodomas, paspaudimai ignoruojami', (
+    tester,
+  ) async {
     final taps = await _pump(tester, selected: {'b'}, locked: true);
 
     expect(_iconOn(_risky, Icons.cancel), findsOneWidget);

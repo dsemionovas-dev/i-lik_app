@@ -24,11 +24,11 @@ class GuideBlock {
   final List<String> items;
 
   factory GuideBlock.fromJson(Json json) => GuideBlock(
-        kind: GuideBlockKind.fromKey(json['kind'] as String),
-        heading: json['heading'] as String?,
-        text: json['text'] as String?,
-        items: parseStringList(json['items']),
-      );
+    kind: GuideBlockKind.fromKey(json['kind'] as String),
+    heading: json['heading'] as String?,
+    text: json['text'] as String?,
+    items: parseStringList(json['items']),
+  );
 }
 
 class GuideSource {
@@ -37,8 +37,7 @@ class GuideSource {
   final String title;
   final String? url;
 
-  factory GuideSource.fromJson(Json json) =>
-      GuideSource(title: json['title'] as String, url: json['url'] as String?);
+  factory GuideSource.fromJson(Json json) => GuideSource(title: json['title'] as String, url: json['url'] as String?);
 }
 
 class GuideCategory {
@@ -76,22 +75,27 @@ class GuideCard {
   final List<GuideSource> sources;
 
   factory GuideCard.fromJson(Json json) => GuideCard(
-        id: json['id'] as String,
-        categoryId: json['categoryId'] as String,
-        title: json['title'] as String,
-        summary: json['summary'] as String,
-        blocks: parseList(json['blocks'], GuideBlock.fromJson),
-        keywords: parseStringList(json['keywords']),
-        emergencyCall: json['emergencyCall'] as bool? ?? false,
-        sources: parseList(json['sources'], GuideSource.fromJson),
-      );
+    id: json['id'] as String,
+    categoryId: json['categoryId'] as String,
+    title: json['title'] as String,
+    summary: json['summary'] as String,
+    blocks: parseList(json['blocks'], GuideBlock.fromJson),
+    keywords: parseStringList(json['keywords']),
+    emergencyCall: json['emergencyCall'] as bool? ?? false,
+    sources: parseList(json['sources'], GuideSource.fromJson),
+  );
 
   /// Visi žodžiai turi būti kortelėje (be diakritikų ir didžiųjų raidžių).
   bool matches(String query) {
     final words = foldForSearch(query).split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
     if (words.isEmpty) return true;
     final haystack = foldForSearch(
-      [title, summary, ...keywords, for (final b in blocks) ...[?b.heading, ?b.text, ...b.items]].join(' '),
+      [
+        title,
+        summary,
+        ...keywords,
+        for (final b in blocks) ...[?b.heading, ?b.text, ...b.items],
+      ].join(' '),
     );
     return words.every(haystack.contains);
   }
@@ -115,9 +119,9 @@ class GuideBook {
   }
 
   List<GuideCard> search({String query = '', String? categoryId}) => [
-        for (final c in cards)
-          if ((categoryId == null || c.categoryId == categoryId) && c.matches(query)) c,
-      ];
+    for (final c in cards)
+      if ((categoryId == null || c.categoryId == categoryId) && c.matches(query)) c,
+  ];
 
   /// Meta klaidą, jei paketas netinkamas – toks į kešą nepatenka.
   factory GuideBook.fromJson(Json json) {
@@ -138,9 +142,7 @@ class GuideBook {
   }
 }
 
-const _fold = {
-  'ą': 'a', 'č': 'c', 'ę': 'e', 'ė': 'e', 'į': 'i', 'š': 's', 'ų': 'u', 'ū': 'u', 'ž': 'z',
-};
+const _fold = {'ą': 'a', 'č': 'c', 'ę': 'e', 'ė': 'e', 'į': 'i', 'š': 's', 'ų': 'u', 'ū': 'u', 'ž': 'z'};
 
 /// „Ąžuolas“ → „azuolas“: krizės metu rašoma ir be lietuviškos klaviatūros.
 String foldForSearch(String text) {

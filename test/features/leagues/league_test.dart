@@ -6,8 +6,10 @@ import '../../helpers/fakes.dart';
 
 void main() {
   List<LeagueZone> zones(LeagueStanding s) => [for (final m in s.members) s.zoneOf(m.rank)];
-  List<int> ranksIn(LeagueStanding s, LeagueZone z) =>
-      [for (final m in s.members) if (s.zoneOf(m.rank) == z) m.rank];
+  List<int> ranksIn(LeagueStanding s, LeagueZone z) => [
+    for (final m in s.members)
+      if (s.zoneOf(m.rank) == z) m.rank,
+  ];
 
   group('zonos (ta pati taisyklė kaip SQL league_outcome)', () {
     test('pilna grupė: 1–7 kyla, 26–30 krenta', () {
@@ -60,8 +62,13 @@ void main() {
 
   test('neprisijungęs šią savaitę – tuščia grupė', () {
     final s = LeagueStanding.fromJson({
-      'week_start': '2026-10-12', 'week_end': '2026-10-18T21:00:00+00:00', 'tier': 1,
-      'tier_name': 'Pradinukas', 'joined': false, 'members': <Object>[], 'last_week': null,
+      'week_start': '2026-10-12',
+      'week_end': '2026-10-18T21:00:00+00:00',
+      'tier': 1,
+      'tier_name': 'Pradinukas',
+      'joined': false,
+      'members': <Object>[],
+      'last_week': null,
     });
     expect(s.joined, isFalse);
     expect(s.me, isNull);

@@ -31,11 +31,7 @@ class LessonResult {
 
   /// XP pagal PRD: bazinis + už kiekvieną teisingą užduotį + be klaidų premija
   /// + combo premija už kiekvieną teisingą iš eilės nuo `comboThreshold`.
-  static int calculateXp({
-    required Lesson lesson,
-    required List<bool> answers,
-    required List<LessonItem> gradedItems,
-  }) {
+  static int calculateXp({required Lesson lesson, required List<bool> answers, required List<LessonItem> gradedItems}) {
     final r = lesson.rewards;
     var xp = r.baseXp;
     var streak = 0;

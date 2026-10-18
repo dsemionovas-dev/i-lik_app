@@ -122,7 +122,10 @@ class _MatchPairsViewState extends State<MatchPairsView> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final wrongLefts = widget.locked
-        ? [for (final l in _lefts) if (_matches[l] != _correct[l]) l]
+        ? [
+            for (final l in _lefts)
+              if (_matches[l] != _correct[l]) l,
+          ]
         : const <String>[];
 
     return Column(
@@ -175,14 +178,7 @@ class _MatchPairsViewState extends State<MatchPairsView> {
 enum _TileState { idle, active, matched, correct, wrong }
 
 class _PairTile extends StatelessWidget {
-  const _PairTile({
-    super.key,
-    required this.text,
-    required this.state,
-    this.number,
-    this.partner,
-    this.onTap,
-  });
+  const _PairTile({super.key, required this.text, required this.state, this.number, this.partner, this.onTap});
 
   final String text;
   final _TileState state;
@@ -209,10 +205,10 @@ class _PairTile extends StatelessWidget {
       _TileState.correct => Icon(Icons.check_circle, color: border, size: 22),
       _TileState.wrong => Icon(Icons.cancel, color: border, size: 22),
       _TileState.matched => CircleAvatar(
-          radius: 11,
-          backgroundColor: scheme.secondary,
-          child: Text('$number', style: theme.textTheme.labelSmall?.copyWith(color: scheme.onSecondary)),
-        ),
+        radius: 11,
+        backgroundColor: scheme.secondary,
+        child: Text('$number', style: theme.textTheme.labelSmall?.copyWith(color: scheme.onSecondary)),
+      ),
       _ => null,
     };
 

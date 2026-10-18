@@ -68,10 +68,7 @@ void main() {
     final graded = lesson.items.where((i) => i.isGraded).toList();
     // Užduočių XP: q2 2, q3 2, q4 3, q5 3, q6 2, q7 3, q8 3 = 18
     // 10 bazinis + 18 + combo 3 × 2 (5-as, 6-as, 7-as iš eilės) + 5 be klaidų
-    expect(
-      LessonResult.calculateXp(lesson: lesson, answers: List.filled(7, true), gradedItems: graded),
-      39,
-    );
+    expect(LessonResult.calculateXp(lesson: lesson, answers: List.filled(7, true), gradedItems: graded), 39);
     // Klaida 2-oje: 10 + 2 + 3 + 3 + 2 + 3 + 3 = 26, combo tik 7-ai (5-a iš eilės) +2
     expect(
       LessonResult.calculateXp(
@@ -113,14 +110,17 @@ void main() {
     expect(noRatio.aspectRatio, 1.0);
   });
 
-
   test('porų tikrinimas reikalauja visų teisingų porų', () {
     final q5 = lesson.items[4] as MatchPairsItem;
     final correct = {for (final p in q5.pairs) p.left: p.right};
     expect(q5.isCorrect(correct), isTrue);
     expect(q5.isCorrect({...correct}..remove('Sukamas žiedas')), isFalse);
     expect(
-      q5.isCorrect({...correct, 'Magnetinė adata': 'Nukreipiama į tikslą', 'Krypties rodyklė': 'Rodo magnetinę šiaurę'}),
+      q5.isCorrect({
+        ...correct,
+        'Magnetinė adata': 'Nukreipiama į tikslą',
+        'Krypties rodyklė': 'Rodo magnetinę šiaurę',
+      }),
       isFalse,
     );
   });

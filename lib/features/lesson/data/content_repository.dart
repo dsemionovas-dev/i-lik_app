@@ -34,9 +34,9 @@ class ContentRepository implements LessonRepository {
     required LessonCache cache,
     required BundledContentSource bundled,
     this.timeout = const Duration(seconds: 8),
-  })  : _remote = remote,
-        _cache = cache,
-        _bundled = bundled;
+  }) : _remote = remote,
+       _cache = cache,
+       _bundled = bundled;
 
   final LessonRemoteDataSource? _remote;
   final LessonCache _cache;
@@ -137,9 +137,9 @@ class ContentRepository implements LessonRepository {
   }
 
   Future<Lesson?> _readCachedLesson(String lessonId) => _quietly('skaitant pamoką iš kešo', () async {
-        final Json? json = await _cache.readLesson(lessonId);
-        return json == null ? null : Lesson.fromJson(json);
-      });
+    final Json? json = await _cache.readLesson(lessonId);
+    return json == null ? null : Lesson.fromJson(json);
+  });
 
   /// Kešo klaidos (pilnas diskas, sena schema) neturi sustabdyti pamokos.
   Future<T?> _quietly<T>(String what, Future<T?> Function() action) async {
@@ -151,6 +151,5 @@ class ContentRepository implements LessonRepository {
     }
   }
 
-  void _log(String message, Object error) =>
-      developer.log('$message: $error', name: 'islik.content');
+  void _log(String message, Object error) => developer.log('$message: $error', name: 'islik.content');
 }

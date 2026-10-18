@@ -5,8 +5,7 @@ import 'media_image.dart';
 /// todėl variantus galima laisvai maišyti.
 class QuestionOption {
   const QuestionOption({required this.id, this.text, this.image, this.outcome})
-      : assert(text != null || image != null,
-            'Variantas turi turėti tekstą arba paveikslėlį');
+    : assert(text != null || image != null, 'Variantas turi turėti tekstą arba paveikslėlį');
 
   final String id;
   final String? text;
@@ -16,18 +15,18 @@ class QuestionOption {
   final String? outcome;
 
   factory QuestionOption.fromJson(Json json) => QuestionOption(
-        id: json['id'] as String,
-        text: json['text'] as String?,
-        image: MediaImage.maybeFromJson(json['image']),
-        outcome: json['outcome'] as String?,
-      );
+    id: json['id'] as String,
+    text: json['text'] as String?,
+    image: MediaImage.maybeFromJson(json['image']),
+    outcome: json['outcome'] as String?,
+  );
 
   Json toJson() => {
-        'id': id,
-        if (text != null) 'text': text,
-        if (image != null) 'image': image!.toJson(),
-        if (outcome != null) 'outcome': outcome,
-      };
+    'id': id,
+    if (text != null) 'text': text,
+    if (image != null) 'image': image!.toJson(),
+    if (outcome != null) 'outcome': outcome,
+  };
 }
 
 /// Paaiškinimas, rodomas po atsakymo.
@@ -42,14 +41,8 @@ class ItemFeedback {
   factory ItemFeedback.fromJson(Object? json) {
     if (json == null) return empty;
     final map = json as Json;
-    return ItemFeedback(
-      correct: map['correct'] as String?,
-      incorrect: map['incorrect'] as String?,
-    );
+    return ItemFeedback(correct: map['correct'] as String?, incorrect: map['incorrect'] as String?);
   }
 
-  Json toJson() => {
-        if (correct != null) 'correct': correct,
-        if (incorrect != null) 'incorrect': incorrect,
-      };
+  Json toJson() => {if (correct != null) 'correct': correct, if (incorrect != null) 'incorrect': incorrect};
 }

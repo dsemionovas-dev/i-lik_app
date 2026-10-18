@@ -27,10 +27,7 @@ void main() {
     expect(await cache.readCatalog(), {'courses': <Object>[]});
     expect(await cache.readLesson('nav-u02-l03'), {'id': 'nav-u02-l03', 'version': 5, 'title': 'Ąžuolas'});
     expect(File('${dir.path}/lessons/nav-u02-l03.json').existsSync(), isTrue);
-    expect(
-      dir.listSync(recursive: true).where((f) => f.path.endsWith('.tmp')),
-      isEmpty,
-    );
+    expect(dir.listSync(recursive: true).where((f) => f.path.endsWith('.tmp')), isEmpty);
   });
 
   test('sugadintas failas traktuojamas kaip kešo nebuvimas', () async {

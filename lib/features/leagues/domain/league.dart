@@ -8,20 +8,15 @@ enum LeagueOutcome {
   demoted;
 
   static LeagueOutcome? fromKey(String? key) => switch (key) {
-        'promoted' => promoted,
-        'stayed' => stayed,
-        'demoted' => demoted,
-        _ => null,
-      };
+    'promoted' => promoted,
+    'stayed' => stayed,
+    'demoted' => demoted,
+    _ => null,
+  };
 }
 
 class LeagueMember {
-  const LeagueMember({
-    required this.rank,
-    required this.displayName,
-    required this.weeklyXp,
-    this.isMe = false,
-  });
+  const LeagueMember({required this.rank, required this.displayName, required this.weeklyXp, this.isMe = false});
 
   final int rank;
   final String displayName;
@@ -29,21 +24,16 @@ class LeagueMember {
   final bool isMe;
 
   factory LeagueMember.fromJson(Json json) => LeagueMember(
-        rank: json['rank'] as int,
-        displayName: json['display_name'] as String,
-        weeklyXp: json['weekly_xp'] as int,
-        isMe: json['is_me'] as bool? ?? false,
-      );
+    rank: json['rank'] as int,
+    displayName: json['display_name'] as String,
+    weeklyXp: json['weekly_xp'] as int,
+    isMe: json['is_me'] as bool? ?? false,
+  );
 }
 
 /// Praėjusios savaitės rezultatas – rodomas kaip „Pakilai į …“.
 class LeagueLastWeek {
-  const LeagueLastWeek({
-    required this.tier,
-    required this.tierName,
-    required this.finalRank,
-    required this.outcome,
-  });
+  const LeagueLastWeek({required this.tier, required this.tierName, required this.finalRank, required this.outcome});
 
   final int tier;
   final String tierName;
@@ -51,11 +41,11 @@ class LeagueLastWeek {
   final LeagueOutcome outcome;
 
   factory LeagueLastWeek.fromJson(Json json) => LeagueLastWeek(
-        tier: json['tier'] as int,
-        tierName: json['tier_name'] as String,
-        finalRank: json['final_rank'] as int,
-        outcome: LeagueOutcome.fromKey(json['outcome'] as String?) ?? LeagueOutcome.stayed,
-      );
+    tier: json['tier'] as int,
+    tierName: json['tier_name'] as String,
+    finalRank: json['final_rank'] as int,
+    outcome: LeagueOutcome.fromKey(json['outcome'] as String?) ?? LeagueOutcome.stayed,
+  );
 }
 
 /// Mano šios savaitės lyga (RPC `get_my_league`). Taisyklių skaičiai ateina iš
@@ -109,16 +99,16 @@ class LeagueStanding {
   }
 
   factory LeagueStanding.fromJson(Json json) => LeagueStanding(
-        tier: json['tier'] as int,
-        tierName: json['tier_name'] as String,
-        weekStart: DateTime.parse(json['week_start'] as String),
-        weekEnd: DateTime.parse(json['week_end'] as String),
-        joined: json['joined'] as bool? ?? false,
-        maxTier: json['max_tier'] as int? ?? 10,
-        groupSize: json['group_size'] as int? ?? 30,
-        promoteCount: json['promote_count'] as int? ?? 7,
-        demoteCount: json['demote_count'] as int? ?? 5,
-        members: parseList(json['members'], LeagueMember.fromJson),
-        lastWeek: json['last_week'] == null ? null : LeagueLastWeek.fromJson(json['last_week'] as Json),
-      );
+    tier: json['tier'] as int,
+    tierName: json['tier_name'] as String,
+    weekStart: DateTime.parse(json['week_start'] as String),
+    weekEnd: DateTime.parse(json['week_end'] as String),
+    joined: json['joined'] as bool? ?? false,
+    maxTier: json['max_tier'] as int? ?? 10,
+    groupSize: json['group_size'] as int? ?? 30,
+    promoteCount: json['promote_count'] as int? ?? 7,
+    demoteCount: json['demote_count'] as int? ?? 5,
+    members: parseList(json['members'], LeagueMember.fromJson),
+    lastWeek: json['last_week'] == null ? null : LeagueLastWeek.fromJson(json['last_week'] as Json),
+  );
 }

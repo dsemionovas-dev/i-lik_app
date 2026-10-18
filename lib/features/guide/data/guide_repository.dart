@@ -22,8 +22,7 @@ class FileGuideCache implements GuideCache {
 
   final Future<File> Function() _file;
 
-  static Future<File> _defaultFile() async =>
-      File('${(await getApplicationSupportDirectory()).path}/guide.json');
+  static Future<File> _defaultFile() async => File('${(await getApplicationSupportDirectory()).path}/guide.json');
 
   @override
   Future<Json?> read() async => readJsonFile(await _file());
@@ -59,9 +58,9 @@ class GuideRepository {
     GuideRemoteDataSource? remote,
     AssetBundle? bundle,
     this.timeout = const Duration(seconds: 8),
-  })  : _cache = cache,
-        _remote = remote,
-        _bundle = bundle ?? rootBundle;
+  }) : _cache = cache,
+       _remote = remote,
+       _bundle = bundle ?? rootBundle;
 
   static const asset = 'assets/guide/guide.json';
 

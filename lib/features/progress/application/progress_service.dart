@@ -57,11 +57,11 @@ class ProgressService {
     Uuid uuid = const Uuid(),
     DateTime Function()? clock,
     this.timeout = const Duration(seconds: 10),
-  })  : _store = store,
-        _remote = remote,
-        _resolveUserId = resolveUserId,
-        _uuid = uuid,
-        _clock = clock ?? DateTime.now;
+  }) : _store = store,
+       _remote = remote,
+       _resolveUserId = resolveUserId,
+       _uuid = uuid,
+       _clock = clock ?? DateTime.now;
 
   final ProgressStore _store;
   final ProgressRemoteDataSource? _remote;
@@ -107,7 +107,8 @@ class ProgressService {
       xp: xp,
       completedAt: now,
     );
-    final current = snapshot.progress[lessonId] ??
+    final current =
+        snapshot.progress[lessonId] ??
         UserProgress.empty(userId: snapshot.ownerId ?? '', lessonId: lessonId, lessonVersion: lessonVersion, at: now);
     final updated = current.withAttempt(accuracy: attempt.accuracy, xp: xp, at: now, lessonVersion: lessonVersion);
 
@@ -204,8 +205,7 @@ class ProgressService {
 
   /// Postgres klaidų klasės: 22 – netinkami duomenys, 23 – apribojimai (pvz., nėra pamokos),
   /// P0 – funkcijos `raise`. Kitos (JWT, 5xx, PGRST) – laikinos.
-  static bool _isPermanent(PostgrestException e) =>
-      RegExp(r'^(22|23|P0)').hasMatch(e.code ?? '');
+  static bool _isPermanent(PostgrestException e) => RegExp(r'^(22|23|P0)').hasMatch(e.code ?? '');
 
   /// Įrašai eina vienas po kito – du lygiagretūs įrašai nesusidurtų ties laikinu failu.
   Future<void> _persist() {

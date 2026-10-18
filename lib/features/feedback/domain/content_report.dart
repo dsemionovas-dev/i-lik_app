@@ -52,27 +52,27 @@ class ContentReport {
   }
 
   factory ContentReport.fromJson(Json json) => ContentReport(
-        id: json['id'] as String,
-        category: ReportCategory.fromKey(json['category'] as String),
-        message: json['message'] as String,
-        createdAt: DateTime.parse(json['created_at'] as String),
-        appVersion: json['app_version'] as String,
-        platform: json['platform'] as String,
-        lessonId: json['lesson_id'] as String?,
-        itemId: json['item_id'] as String?,
-        guideCardId: json['guide_card_id'] as String?,
-      );
+    id: json['id'] as String,
+    category: ReportCategory.fromKey(json['category'] as String),
+    message: json['message'] as String,
+    createdAt: DateTime.parse(json['created_at'] as String),
+    appVersion: json['app_version'] as String,
+    platform: json['platform'] as String,
+    lessonId: json['lesson_id'] as String?,
+    itemId: json['item_id'] as String?,
+    guideCardId: json['guide_card_id'] as String?,
+  );
 
   /// Ir vietinė eilė, ir `content_reports` eilutė (be user_id – jį nustato serveris).
   Json toJson() => {
-        'id': id,
-        'category': category.key,
-        'message': message,
-        'created_at': createdAt.toUtc().toIso8601String(),
-        'app_version': appVersion,
-        'platform': platform,
-        'lesson_id': lessonId,
-        'item_id': itemId,
-        'guide_card_id': guideCardId,
-      };
+    'id': id,
+    'category': category.key,
+    'message': message,
+    'created_at': createdAt.toUtc().toIso8601String(),
+    'app_version': appVersion,
+    'platform': platform,
+    'lesson_id': lessonId,
+    'item_id': itemId,
+    'guide_card_id': guideCardId,
+  };
 }

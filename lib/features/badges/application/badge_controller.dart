@@ -21,8 +21,10 @@ class BadgeState {
   bool isEarned(String id) => earned.containsKey(id);
 
   /// Gauti ne anksčiau nei [time] (pvz., per ką tik baigtą pamoką).
-  List<BadgeDefinition> earnedSince(DateTime time) =>
-      [for (final d in definitions) if (earned[d.id] case final at? when !at.isBefore(time)) d];
+  List<BadgeDefinition> earnedSince(DateTime time) => [
+    for (final d in definitions)
+      if (earned[d.id] case final at? when !at.isBefore(time)) d,
+  ];
 }
 
 final badgeDefinitionsProvider = FutureProvider<List<BadgeDefinition>>((ref) => loadBadgeDefinitions());

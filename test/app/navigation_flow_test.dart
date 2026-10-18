@@ -26,16 +26,18 @@ Future<void> pumpApp(WidgetTester tester, {bool onboarded = false, List<Override
   rootBundle.clear();
   SharedPreferences.setMockInitialValues({'onboarding_completed': onboarded});
   final prefs = await SharedPreferences.getInstance();
-  await tester.pumpWidget(ProviderScope(
-    overrides: [
-      sharedPreferencesProvider.overrideWithValue(prefs),
-      lessonCacheProvider.overrideWithValue(InMemoryLessonCache()),
-      progressStoreProvider.overrideWithValue(InMemoryProgressStore()),
-      guideCacheProvider.overrideWithValue(InMemoryGuideCache()),
-      ...overrides,
-    ],
-    child: const IslikApp(),
-  ));
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+        lessonCacheProvider.overrideWithValue(InMemoryLessonCache()),
+        progressStoreProvider.overrideWithValue(InMemoryProgressStore()),
+        guideCacheProvider.overrideWithValue(InMemoryGuideCache()),
+        ...overrides,
+      ],
+      child: const IslikApp(),
+    ),
+  );
   await tester.pumpAndSettle();
 }
 
@@ -89,10 +91,14 @@ Future<void> revealInProfile(WidgetTester tester, Finder finder) async {
 
 /// Profilio statistikos plytelės reikšmė pagal pavadinimą.
 String statValue(WidgetTester tester, String label) => tester
-    .widget<Text>(find.descendant(
-      of: find.ancestor(of: find.text(label), matching: find.byType(Column)).first,
-      matching: find.byType(Text),
-    ).first)
+    .widget<Text>(
+      find
+          .descendant(
+            of: find.ancestor(of: find.text(label), matching: find.byType(Column)).first,
+            matching: find.byType(Text),
+          )
+          .first,
+    )
     .data!;
 
 /// Pereina visą pamoką neteisingais atsakymais (0 %, 10 XP) iki rezultatų ekrano.
@@ -444,11 +450,11 @@ void main() {
     late FakeReportRemote reports;
 
     List<Override> online() => [
-          authRepositoryProvider.overrideWithValue(auth),
-          progressRemoteDataSourceProvider.overrideWithValue(remote),
-          leagueRepositoryProvider.overrideWithValue(leagues),
-          reportRemoteDataSourceProvider.overrideWithValue(reports),
-        ];
+      authRepositoryProvider.overrideWithValue(auth),
+      progressRemoteDataSourceProvider.overrideWithValue(remote),
+      leagueRepositoryProvider.overrideWithValue(leagues),
+      reportRemoteDataSourceProvider.overrideWithValue(reports),
+    ];
 
     setUp(() {
       auth = FakeAuthRepository(user: const AppUser(id: 'guest-1', isAnonymous: true));
@@ -470,9 +476,12 @@ void main() {
       // Iš pamokos – numatytoji kategorija „Klaida turinyje“.
       expect(
         tester.widget<RadioGroup<ReportCategory>>(find.byType(RadioGroup<ReportCategory>)).groupValue,
-      ReportCategory.fromKey('content_error'),
+        ReportCategory.fromKey('content_error'),
       );
-      await tester.enterText(find.byKey(const ValueKey('report-message')), 'Rytai yra 90°, bet paaiškinime parašyta kitaip.');
+      await tester.enterText(
+        find.byKey(const ValueKey('report-message')),
+        'Rytai yra 90°, bet paaiškinime parašyta kitaip.',
+      );
       await tapSend(tester);
       await tester.pumpAndSettle();
 
@@ -496,7 +505,10 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('report-category-unsafe_advice')));
       await tester.pumpAndSettle();
       expect(find.text('Ačiū – tokie pranešimai peržiūrimi pirmiausia.'), findsOneWidget);
-      await tester.enterText(find.byKey(const ValueKey('report-message')), 'Hipotermijos atmintinėje trūksta įspėjimo.');
+      await tester.enterText(
+        find.byKey(const ValueKey('report-message')),
+        'Hipotermijos atmintinėje trūksta įspėjimo.',
+      );
       await tapSend(tester);
       await tester.pumpAndSettle();
       expect(find.text('Ačiū! Pranešimas išsaugotas ir bus išsiųstas, kai atsiras ryšys.'), findsOneWidget);

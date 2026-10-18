@@ -19,9 +19,10 @@ abstract final class Routes {
     return Uri(path: reportPath, queryParameters: params.isEmpty ? null : params).toString();
   }
 
-  static String resetPassword({String? email}) =>
-      Uri(path: resetPasswordPath, queryParameters: email == null || email.isEmpty ? null : {'email': email})
-          .toString();
+  static String resetPassword({String? email}) => Uri(
+    path: resetPasswordPath,
+    queryParameters: email == null || email.isEmpty ? null : {'email': email},
+  ).toString();
 
   /// Pasiekiama be onboardingo ir paskyros (PRD: gidas krizės metu; slaptažodžio atstatymas).
   static bool isPublic(String location) =>

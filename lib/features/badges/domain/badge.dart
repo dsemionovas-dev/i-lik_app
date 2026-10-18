@@ -8,14 +8,14 @@ sealed class BadgeRule {
   const BadgeRule();
 
   factory BadgeRule.fromJson(Json json) => switch (json['type']) {
-        'lessons_completed' => LessonsCompletedRule(json['count'] as int),
-        'perfect_lessons' => PerfectLessonsRule(json['count'] as int),
-        'total_xp' => TotalXpRule(json['xp'] as int),
-        'streak_days' => StreakRule(json['days'] as int),
-        'unit_completed' => UnitCompletedRule(json['unitId'] as String),
-        // Naujesnės versijos taisyklė – ženklelį rodo tik serveris.
-        final type => UnknownRule(type.toString()),
-      };
+    'lessons_completed' => LessonsCompletedRule(json['count'] as int),
+    'perfect_lessons' => PerfectLessonsRule(json['count'] as int),
+    'total_xp' => TotalXpRule(json['xp'] as int),
+    'streak_days' => StreakRule(json['days'] as int),
+    'unit_completed' => UnitCompletedRule(json['unitId'] as String),
+    // Naujesnės versijos taisyklė – ženklelį rodo tik serveris.
+    final type => UnknownRule(type.toString()),
+  };
 
   /// (dabar, tikslas) – rodoma prie negautų ženklelių, pvz., „3 / 7“.
   ({int current, int target}) progress(BadgeStats stats);
@@ -96,12 +96,12 @@ class BadgeDefinition {
   final BadgeRule rule;
 
   factory BadgeDefinition.fromJson(Json json) => BadgeDefinition(
-        id: json['id'] as String,
-        title: json['title'] as String,
-        description: json['description'] as String,
-        icon: json['icon'] as String? ?? 'badge',
-        rule: BadgeRule.fromJson(json['rule'] as Json),
-      );
+    id: json['id'] as String,
+    title: json['title'] as String,
+    description: json['description'] as String,
+    icon: json['icon'] as String? ?? 'badge',
+    rule: BadgeRule.fromJson(json['rule'] as Json),
+  );
 
   static List<BadgeDefinition> listFromJson(Json json) => parseList(json['badges'], BadgeDefinition.fromJson);
 }
@@ -134,7 +134,10 @@ class BadgeStats {
     ContentCatalog? catalog,
     DateTime? today,
   }) {
-    final completed = {for (final p in progress.values) if (p.isCompleted) p.lessonId};
+    final completed = {
+      for (final p in progress.values)
+        if (p.isCompleted) p.lessonId,
+    };
     // Dienos ir iš serverio progreso (pvz., kitame įrenginyje baigtos pamokos).
     final days = {
       ...activityDays,
@@ -149,7 +152,9 @@ class BadgeStats {
       currentStreak: streaks.current,
       unitLessons: catalog == null
           ? const {}
-          : {for (final u in catalog.units) u.id: [for (final l in catalog.lessonsOf(u.id)) l.id]},
+          : {
+              for (final u in catalog.units) u.id: [for (final l in catalog.lessonsOf(u.id)) l.id],
+            },
     );
   }
 }
@@ -160,8 +165,7 @@ abstract final class Streak {
   static ({int longest, int current}) of(Set<String> dayKeys, {required DateTime today}) {
     if (dayKeys.isEmpty) return (longest: 0, current: 0);
     // Kalendorinės dienos kaip UTC datos – vasaros laiko perėjimas netrukdo skaičiuoti.
-    final days = dayKeys.map(DateTime.parse).map((d) => DateTime.utc(d.year, d.month, d.day)).toSet().toList()
-      ..sort();
+    final days = dayKeys.map(DateTime.parse).map((d) => DateTime.utc(d.year, d.month, d.day)).toSet().toList()..sort();
     var longest = 1, run = 1;
     for (var i = 1; i < days.length; i++) {
       run = days[i].difference(days[i - 1]).inDays == 1 ? run + 1 : 1;

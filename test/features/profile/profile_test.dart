@@ -67,11 +67,13 @@ void main() {
     Future<void> setUpContainer({bool online = true, Map<String, Object> prefs = const {}}) async {
       SharedPreferences.setMockInitialValues(prefs);
       final sp = await SharedPreferences.getInstance();
-      container = ProviderContainer(overrides: [
-        sharedPreferencesProvider.overrideWithValue(sp),
-        authRepositoryProvider.overrideWithValue(auth),
-        profileRemoteDataSourceProvider.overrideWithValue(online ? remote : null),
-      ]);
+      container = ProviderContainer(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(sp),
+          authRepositoryProvider.overrideWithValue(auth),
+          profileRemoteDataSourceProvider.overrideWithValue(online ? remote : null),
+        ],
+      );
       addTearDown(container.dispose);
       // Riverpod 3 pristabdo neklausomus providerius – kaip ekranas, klausomės.
       container.listen(profileControllerProvider, (_, _) {});
@@ -110,7 +112,11 @@ void main() {
     });
 
     test('be ryšio: rodoma vietinė kopija; išsaugoti nepavyksta – aiški klaida', () async {
-      await setUpContainer(prefs: {'profile_u1': jsonEncode({'display_name': 'Vietinis', 'avatar': 'owl'})});
+      await setUpContainer(
+        prefs: {
+          'profile_u1': jsonEncode({'display_name': 'Vietinis', 'avatar': 'owl'}),
+        },
+      );
       remote.error = const PostgrestException(message: 'nėra ryšio');
 
       expect((await container.read(profileControllerProvider.future)).displayName, 'Vietinis');
@@ -123,7 +129,11 @@ void main() {
 
     test('serverio versija pakeičia vietinę (pakeista kitame įrenginyje)', () async {
       remote.stored = const Profile(displayName: 'Iš serverio', avatar: 'bear');
-      await setUpContainer(prefs: {'profile_u1': jsonEncode({'display_name': 'Senas', 'avatar': 'owl'})});
+      await setUpContainer(
+        prefs: {
+          'profile_u1': jsonEncode({'display_name': 'Senas', 'avatar': 'owl'}),
+        },
+      );
       final state = await container.read(profileControllerProvider.future);
       expect(state.displayName, 'Iš serverio');
       expect(state.profile.avatarEmoji, '🐻');
@@ -139,14 +149,16 @@ void main() {
 
   test('Supabase: profilis įrašomas upsert į profiles', () async {
     final requests = <http.Request>[];
-    final source = SupabaseProfileRemoteDataSource(SupabaseClient(
-      'https://test.supabase.co',
-      'k',
-      httpClient: MockClient((r) async {
-        requests.add(r);
-        return http.Response('', 201, request: r);
-      }),
-    ));
+    final source = SupabaseProfileRemoteDataSource(
+      SupabaseClient(
+        'https://test.supabase.co',
+        'k',
+        httpClient: MockClient((r) async {
+          requests.add(r);
+          return http.Response('', 201, request: r);
+        }),
+      ),
+    );
     await source.save('u1', const Profile(displayName: 'Miško Lapė', avatar: 'fox'));
 
     final r = requests.single;

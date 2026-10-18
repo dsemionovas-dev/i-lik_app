@@ -48,8 +48,6 @@ class EarnedBadgeStore {
     }
   }
 
-  Future<void> write(Map<String, DateTime> earned) => _prefs.setString(
-        _key,
-        jsonEncode(earned.map((id, at) => MapEntry(id, at.toUtc().toIso8601String()))),
-      );
+  Future<void> write(Map<String, DateTime> earned) =>
+      _prefs.setString(_key, jsonEncode(earned.map((id, at) => MapEntry(id, at.toUtc().toIso8601String()))));
 }

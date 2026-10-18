@@ -42,60 +42,45 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(
-        path: Routes.onboarding,
-        builder: (context, state) => const OnboardingScreen(),
-      ),
+      GoRoute(path: Routes.onboarding, builder: (context, state) => const OnboardingScreen()),
 
       // 4 skirtukai; kiekvienas turi savo navigacijos steką (indexedStack išlaiko būseną).
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => ScaffoldWithNavBar(shell: shell),
         branches: [
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: Routes.home,
-              builder: (context, state) => const HomeScreen(),
-            ),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: Routes.tree,
-              builder: (context, state) => const LessonTreeScreen(),
-            ),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: Routes.guide,
-              builder: (context, state) => const GuideScreen(),
-              routes: [
-                GoRoute(
-                  path: ':cardId',
-                  builder: (context, state) =>
-                      GuideCardScreen(cardId: state.pathParameters['cardId']!),
-                ),
-              ],
-            ),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: Routes.profile,
-              builder: (context, state) => const ProfileScreen(),
-              routes: [
-                GoRoute(
-                  path: 'settings',
-                  builder: (context, state) => const SettingsScreen(),
-                ),
-                GoRoute(
-                  path: 'league',
-                  builder: (context, state) => const LeagueScreen(),
-                ),
-                GoRoute(
-                  path: 'edit',
-                  builder: (context, state) => const EditProfileScreen(),
-                ),
-              ],
-            ),
-          ]),
+          StatefulShellBranch(
+            routes: [GoRoute(path: Routes.home, builder: (context, state) => const HomeScreen())],
+          ),
+          StatefulShellBranch(
+            routes: [GoRoute(path: Routes.tree, builder: (context, state) => const LessonTreeScreen())],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.guide,
+                builder: (context, state) => const GuideScreen(),
+                routes: [
+                  GoRoute(
+                    path: ':cardId',
+                    builder: (context, state) => GuideCardScreen(cardId: state.pathParameters['cardId']!),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.profile,
+                builder: (context, state) => const ProfileScreen(),
+                routes: [
+                  GoRoute(path: 'settings', builder: (context, state) => const SettingsScreen()),
+                  GoRoute(path: 'league', builder: (context, state) => const LeagueScreen()),
+                  GoRoute(path: 'edit', builder: (context, state) => const EditProfileScreen()),
+                ],
+              ),
+            ],
+          ),
         ],
       ),
 

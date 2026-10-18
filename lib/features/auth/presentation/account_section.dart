@@ -31,76 +31,72 @@ class AccountSection extends ConsumerWidget {
             Text('Paskyra', style: theme.textTheme.titleMedium),
             ...switch (user) {
               null => [
-                  const Text('Neprisijungta.'),
-                  if (supportsAccounts)
-                    OutlinedButton(
-                      onPressed: () => _signIn(context, ref),
-                      child: const Text('Prisijungti'),
-                    ),
-                ],
+                const Text('Neprisijungta.'),
+                if (supportsAccounts)
+                  OutlinedButton(onPressed: () => _signIn(context, ref), child: const Text('Prisijungti')),
+              ],
               AppUser(isAnonymous: true, :final pendingEmail?) => [
-                  const Text('Svečio režimas'),
-                  Text(
-                    'Laukiama patvirtinimo: $pendingEmail. Atidarykite laišką ir paspauskite nuorodą, '
-                    'tada grįžkite į programėlę.',
-                    style: theme.textTheme.bodySmall,
-                  ),
-                  OutlinedButton(
-                    onPressed: action.isLoading ? null : () => _linkEmail(context, ref),
-                    child: const Text('Siųsti dar kartą / kitas adresas'),
-                  ),
-                ],
+                const Text('Svečio režimas'),
+                Text(
+                  'Laukiama patvirtinimo: $pendingEmail. Atidarykite laišką ir paspauskite nuorodą, '
+                  'tada grįžkite į programėlę.',
+                  style: theme.textTheme.bodySmall,
+                ),
+                OutlinedButton(
+                  onPressed: action.isLoading ? null : () => _linkEmail(context, ref),
+                  child: const Text('Siųsti dar kartą / kitas adresas'),
+                ),
+              ],
               AppUser(isAnonymous: true) => [
-                  const Text('Svečio režimas'),
-                  Text(
-                    supportsAccounts
-                        ? 'Susiekite el. paštą, kad progresas neprapultų pakeitus ar pametus telefoną.'
-                        : 'Progresas saugomas tik šiame įrenginyje.',
-                    style: theme.textTheme.bodySmall,
+                const Text('Svečio režimas'),
+                Text(
+                  supportsAccounts
+                      ? 'Susiekite el. paštą, kad progresas neprapultų pakeitus ar pametus telefoną.'
+                      : 'Progresas saugomas tik šiame įrenginyje.',
+                  style: theme.textTheme.bodySmall,
+                ),
+                if (supportsAccounts) ...[
+                  FilledButton(
+                    onPressed: action.isLoading ? null : () => _linkEmail(context, ref),
+                    child: const Text('Susieti el. paštą'),
                   ),
-                  if (supportsAccounts) ...[
-                    FilledButton(
-                      onPressed: action.isLoading ? null : () => _linkEmail(context, ref),
-                      child: const Text('Susieti el. paštą'),
-                    ),
-                    TextButton(
-                      onPressed: action.isLoading ? null : () => _signIn(context, ref),
-                      child: const Text('Jau turiu paskyrą'),
-                    ),
-                  ],
+                  TextButton(
+                    onPressed: action.isLoading ? null : () => _signIn(context, ref),
+                    child: const Text('Jau turiu paskyrą'),
+                  ),
                 ],
+              ],
               AppUser(:final email) => [
-                  Text(email ?? 'Paskyra', key: const ValueKey('account-email')),
-                  if (user.needsPassword) ...[
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.tertiaryContainer,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        'Nustatykite slaptažodį – be jo kitame telefone prie paskyros neprisijungsite.',
-                        style: TextStyle(color: theme.colorScheme.onTertiaryContainer),
-                      ),
+                Text(email ?? 'Paskyra', key: const ValueKey('account-email')),
+                if (user.needsPassword) ...[
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.tertiaryContainer,
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    FilledButton(
-                      onPressed: action.isLoading ? null : () => _setPassword(context, ref),
-                      child: const Text('Nustatyti slaptažodį'),
+                    child: Text(
+                      'Nustatykite slaptažodį – be jo kitame telefone prie paskyros neprisijungsite.',
+                      style: TextStyle(color: theme.colorScheme.onTertiaryContainer),
                     ),
-                  ] else
-                    TextButton(
-                      onPressed: action.isLoading ? null : () => _setPassword(context, ref),
-                      child: const Text('Keisti slaptažodį'),
-                    ),
-                  OutlinedButton(
-                    onPressed: action.isLoading ? null : () => _signOut(context, ref),
-                    child: const Text('Atsijungti'),
                   ),
-                ],
+                  FilledButton(
+                    onPressed: action.isLoading ? null : () => _setPassword(context, ref),
+                    child: const Text('Nustatyti slaptažodį'),
+                  ),
+                ] else
+                  TextButton(
+                    onPressed: action.isLoading ? null : () => _setPassword(context, ref),
+                    child: const Text('Keisti slaptažodį'),
+                  ),
+                OutlinedButton(
+                  onPressed: action.isLoading ? null : () => _signOut(context, ref),
+                  child: const Text('Atsijungti'),
+                ),
+              ],
             },
             if (action.isLoading) const LinearProgressIndicator(),
-            if (action case AsyncError(:final error))
-              Text('$error', style: TextStyle(color: theme.colorScheme.error)),
+            if (action case AsyncError(:final error)) Text('$error', style: TextStyle(color: theme.colorScheme.error)),
             if (action case AsyncData(value: final String message)) Text(message),
           ],
         ),
@@ -146,9 +142,11 @@ class AccountSection extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Atsijungti?'),
-        content: Text(pending > 0
-            ? 'Dar neišsiųsta bandymų: $pending. Atsijungus jie bus prarasti.'
-            : 'Progresas lieka paskyroje – prisijungę jį vėl matysite.'),
+        content: Text(
+          pending > 0
+              ? 'Dar neišsiųsta bandymų: $pending. Atsijungus jie bus prarasti.'
+              : 'Progresas lieka paskyroje – prisijungę jį vėl matysite.',
+        ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Atšaukti')),
           TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Atsijungti')),

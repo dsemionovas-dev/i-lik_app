@@ -32,9 +32,7 @@ final contentRepositoryProvider = Provider<ContentRepository>(
 
 final lessonRepositoryProvider = Provider<LessonRepository>((ref) => ref.watch(contentRepositoryProvider));
 
-final catalogProvider = FutureProvider<ContentCatalog>(
-  (ref) => ref.watch(contentRepositoryProvider).getCatalog(),
-);
+final catalogProvider = FutureProvider<ContentCatalog>((ref) => ref.watch(contentRepositoryProvider).getCatalog());
 
 final lessonProvider = FutureProvider.family<Lesson, String>(
   (ref, lessonId) => ref.watch(lessonRepositoryProvider).getLesson(lessonId),

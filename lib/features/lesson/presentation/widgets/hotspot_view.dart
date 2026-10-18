@@ -8,13 +8,7 @@ import 'lesson_image.dart';
 /// koordinates (0–1); kol netikrinta, paspausti galima iš naujo. Po „TIKRINTI“
 /// ([locked]) parodomos teisingos sritys ir paspaustas taškas.
 class HotspotView extends StatelessWidget {
-  const HotspotView({
-    super.key,
-    required this.item,
-    required this.tap,
-    required this.locked,
-    required this.onTap,
-  });
+  const HotspotView({super.key, required this.item, required this.tap, required this.locked, required this.onTap});
 
   final HotspotItem item;
 
@@ -59,10 +53,12 @@ class HotspotView extends StatelessWidget {
                     behavior: HitTestBehavior.opaque,
                     onTapUp: locked
                         ? null
-                        : (d) => onTap(Offset(
+                        : (d) => onTap(
+                            Offset(
                               (d.localPosition.dx / size.width).clamp(0, 1),
                               (d.localPosition.dy / size.height).clamp(0, 1),
-                            )),
+                            ),
+                          ),
                     child: Stack(
                       children: [
                         Positioned.fill(

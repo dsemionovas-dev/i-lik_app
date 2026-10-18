@@ -6,40 +6,37 @@ import 'package:islik/features/lesson/presentation/widgets/hotspot_view.dart';
 const _north = HotspotArea(x: 0.5, y: 0.1, r: 0.1);
 
 HotspotItem _item({double aspectRatio = 1}) => HotspotItem(
-      id: 'h1',
-      prompt: 'Pažymėk šiaurę.',
-      image: const MediaImage(url: 'https://cdn.test/dial.webp', alt: 'Kompaso skalė'),
-      targetAreas: const [_north],
-      aspectRatio: aspectRatio,
-    );
+  id: 'h1',
+  prompt: 'Pažymėk šiaurę.',
+  image: const MediaImage(url: 'https://cdn.test/dial.webp', alt: 'Kompaso skalė'),
+  targetAreas: const [_north],
+  aspectRatio: aspectRatio,
+);
 
 final _canvas = find.byKey(const ValueKey('hotspot-canvas'));
 final _area = find.byKey(const ValueKey('hotspot-area-0'));
 final _marker = find.byKey(const ValueKey('hotspot-marker'));
 
-Future<List<Offset>> _pump(
-  WidgetTester tester, {
-  Offset? tap,
-  bool locked = false,
-  double aspectRatio = 1,
-}) async {
+Future<List<Offset>> _pump(WidgetTester tester, {Offset? tap, bool locked = false, double aspectRatio = 1}) async {
   final taps = <Offset>[];
-  await tester.pumpWidget(MaterialApp(
-    home: Scaffold(
-      body: Center(
-        // Siauras rėmas, kad visas paveikslėlis tilptų į testo ekraną.
-        child: SizedBox(
-          width: 300,
-          child: HotspotView(
-            item: _item(aspectRatio: aspectRatio),
-            tap: tap,
-            locked: locked,
-            onTap: taps.add,
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Scaffold(
+        body: Center(
+          // Siauras rėmas, kad visas paveikslėlis tilptų į testo ekraną.
+          child: SizedBox(
+            width: 300,
+            child: HotspotView(
+              item: _item(aspectRatio: aspectRatio),
+              tap: tap,
+              locked: locked,
+              onTap: taps.add,
+            ),
           ),
         ),
       ),
     ),
-  ));
+  );
   await tester.pumpAndSettle();
   return taps;
 }

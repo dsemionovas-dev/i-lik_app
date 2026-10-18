@@ -43,30 +43,38 @@ void main() {
       ],
       'lessons': [
         {
-          'id': 'nav-u02-l04', 'course_id': 'navigation', 'unit_id': 'nav-u02', 'title': 'Rūke',
-          'sort_order': 4, 'version': 1, 'estimated_minutes': 7,
+          'id': 'nav-u02-l04',
+          'course_id': 'navigation',
+          'unit_id': 'nav-u02',
+          'title': 'Rūke',
+          'sort_order': 4,
+          'version': 1,
+          'estimated_minutes': 7,
         },
         {
-          'id': 'nav-u02-l03', 'course_id': 'navigation', 'unit_id': 'nav-u02', 'title': 'Azimutas',
-          'sort_order': 3, 'version': 4, 'estimated_minutes': null,
+          'id': 'nav-u02-l03',
+          'course_id': 'navigation',
+          'unit_id': 'nav-u02',
+          'title': 'Azimutas',
+          'sort_order': 3,
+          'version': 4,
+          'estimated_minutes': null,
         },
       ],
     };
 
     final catalog = await source().fetchCatalog();
 
-    expect(requests.map((r) => r.url.path), unorderedEquals([
-      '/rest/v1/courses',
-      '/rest/v1/units',
-      '/rest/v1/lessons',
-    ]));
+    expect(
+      requests.map((r) => r.url.path),
+      unorderedEquals(['/rest/v1/courses', '/rest/v1/units', '/rest/v1/lessons']),
+    );
     // Visos trys rikiuojamos didėjančiai (postgrest numatytasis – mažėjančiai).
     for (final r in requests) {
       expect(r.url.queryParameters['order'], 'sort_order.asc.nullslast', reason: r.url.path);
     }
     final lessonsReq = requests.firstWhere((r) => r.url.path.endsWith('lessons'));
-    expect(lessonsReq.url.queryParameters['select'],
-        'id,course_id,unit_id,title,sort_order,version,estimated_minutes');
+    expect(lessonsReq.url.queryParameters['select'], 'id,course_id,unit_id,title,sort_order,version,estimated_minutes');
     expect(lessonsReq.headers['apikey'], 'publishable-key');
     // Turinys (jsonb) kataloge nesiunčiamas.
     expect(lessonsReq.url.queryParameters['select'], isNot(contains('content')));
@@ -81,7 +89,9 @@ void main() {
   test('pamokos turinys pagal ID', () async {
     responses = {
       'lessons': [
-        {'content': {'id': 'nav-u02-l03', 'version': 4}},
+        {
+          'content': {'id': 'nav-u02-l03', 'version': 4},
+        },
       ],
     };
     final json = await source().fetchLessonContent('nav-u02-l03');

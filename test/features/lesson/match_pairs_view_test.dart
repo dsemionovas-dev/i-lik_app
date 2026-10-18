@@ -31,23 +31,25 @@ class _Probe {
 final _probe = _Probe();
 
 Future<void> _pump(WidgetTester tester, {bool locked = false, int seed = 1}) async {
-  await tester.pumpWidget(MaterialApp(
-    home: Scaffold(
-      body: SingleChildScrollView(
-        child: MatchPairsView(
-          // Tas pats raktas – būsena išlieka perpiešiant su locked: true.
-          key: ValueKey('m-$seed'),
-          item: _item,
-          locked: locked,
-          random: Random(seed),
-          onMatchesChanged: (m) {
-            _probe.matches = m;
-            _probe.calls++;
-          },
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Scaffold(
+        body: SingleChildScrollView(
+          child: MatchPairsView(
+            // Tas pats raktas – būsena išlieka perpiešiant su locked: true.
+            key: ValueKey('m-$seed'),
+            item: _item,
+            locked: locked,
+            random: Random(seed),
+            onMatchesChanged: (m) {
+              _probe.matches = m;
+              _probe.calls++;
+            },
+          ),
         ),
       ),
     ),
-  ));
+  );
   await tester.pumpAndSettle();
 }
 
@@ -57,14 +59,14 @@ Future<void> _tap(WidgetTester tester, String text) async {
 }
 
 Finder _iconOn(String text, IconData icon) => find.descendant(
-      of: find.ancestor(of: find.text(text), matching: find.byType(InkWell)),
-      matching: find.byIcon(icon),
-    );
+  of: find.ancestor(of: find.text(text), matching: find.byType(InkWell)),
+  matching: find.byIcon(icon),
+);
 
 Finder _badgeOn(String text, String number) => find.descendant(
-      of: find.ancestor(of: find.text(text), matching: find.byType(InkWell)),
-      matching: find.widgetWithText(CircleAvatar, number),
-    );
+  of: find.ancestor(of: find.text(text), matching: find.byType(InkWell)),
+  matching: find.widgetWithText(CircleAvatar, number),
+);
 
 void main() {
   setUp(() {
@@ -135,10 +137,7 @@ void main() {
     await _tap(tester, _knife);
     await _tap(tester, _cut);
     expect(_probe.matches, {_axe: _chop, _knife: _cut});
-    expect(
-      tester.getSemantics(find.bySemanticsLabel(_knife)),
-      isSemantics(value: 'Sujungta su: $_cut'),
-    );
+    expect(tester.getSemantics(find.bySemanticsLabel(_knife)), isSemantics(value: 'Sujungta su: $_cut'));
   });
 
   testWidgets('visos poros teisingos – žalia, be „Teisingos poros“ bloko, užrakinta', (tester) async {
@@ -175,10 +174,7 @@ void main() {
     }
     expect(_iconOn(_saw, Icons.check_circle), findsOneWidget);
     expect(_iconOn(_sawing, Icons.check_circle), findsOneWidget);
-    expect(
-      tester.getSemantics(find.bySemanticsLabel(_knife)),
-      isSemantics(hint: 'Neteisinga pora', isButton: false),
-    );
+    expect(tester.getSemantics(find.bySemanticsLabel(_knife)), isSemantics(hint: 'Neteisinga pora', isButton: false));
 
     expect(find.text('Teisingos poros'), findsOneWidget);
     expect(find.text('$_knife → $_cut'), findsOneWidget);

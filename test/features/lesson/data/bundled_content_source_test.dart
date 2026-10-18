@@ -11,12 +11,7 @@ void main() {
     final catalog = await source.loadCatalog();
 
     expect(catalog.source, ContentSource.bundled);
-    expect(catalog.courses.map((c) => c.title), [
-      'Išgyvenimas gamtoje',
-      'Įranga',
-      'Navigacija',
-      'Pilietinis saugumas',
-    ]);
+    expect(catalog.courses.map((c) => c.title), ['Išgyvenimas gamtoje', 'Įranga', 'Navigacija', 'Pilietinis saugumas']);
     // Kiekviena kataloge nurodyta pamoka yra assets ir jos versija sutampa.
     for (final summary in catalog.lessons) {
       final json = await source.loadLesson(summary.id);

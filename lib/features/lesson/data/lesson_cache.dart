@@ -19,8 +19,7 @@ abstract interface class LessonCache {
 /// Rašoma atomiškai ([writeJsonFile]); sugadintas failas traktuojamas kaip
 /// kešo nebuvimas.
 class FileLessonCache implements LessonCache {
-  FileLessonCache({Future<Directory> Function()? rootDirectory})
-      : _root = rootDirectory ?? _defaultRoot;
+  FileLessonCache({Future<Directory> Function()? rootDirectory}) : _root = rootDirectory ?? _defaultRoot;
 
   final Future<Directory> Function() _root;
   Directory? _dir;
@@ -50,6 +49,5 @@ class FileLessonCache implements LessonCache {
   Future<Json?> readLesson(String lessonId) async => readJsonFile(await _lessonFile(lessonId));
 
   @override
-  Future<void> writeLesson(String lessonId, Json content) async =>
-      writeJsonFile(await _lessonFile(lessonId), content);
+  Future<void> writeLesson(String lessonId, Json content) async => writeJsonFile(await _lessonFile(lessonId), content);
 }

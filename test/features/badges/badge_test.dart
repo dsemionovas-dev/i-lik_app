@@ -9,9 +9,12 @@ import 'package:islik/features/progress/domain/models/user_progress.dart';
 
 final _t0 = DateTime(2026, 10, 18, 12);
 
-UserProgress done(String lessonId, {double accuracy = 0.8, int xp = 10, DateTime? at}) =>
-    UserProgress.empty(userId: 'u', lessonId: lessonId, lessonVersion: 1, at: at ?? _t0)
-        .withAttempt(accuracy: accuracy, xp: xp, at: at ?? _t0, lessonVersion: 1);
+UserProgress done(String lessonId, {double accuracy = 0.8, int xp = 10, DateTime? at}) => UserProgress.empty(
+  userId: 'u',
+  lessonId: lessonId,
+  lessonVersion: 1,
+  at: at ?? _t0,
+).withAttempt(accuracy: accuracy, xp: xp, at: at ?? _t0, lessonVersion: 1);
 
 List<BadgeDefinition> bundledBadges() =>
     BadgeDefinition.listFromJson(jsonDecode(File('assets/badges.json').readAsStringSync()) as Json);
@@ -19,12 +22,14 @@ List<BadgeDefinition> bundledBadges() =>
 void main() {
   group('taisyklės', () {
     test('pamokų skaičius, be klaidų, XP', () {
-      final stats = BadgeStats.from(progress: {
-        'a': done('a', accuracy: 1, xp: 60),
-        'b': done('b', xp: 50),
-        // Bandyta, bet nebaigta (< 60 %) – neskaičiuojama.
-        'c': done('c', accuracy: 0.4, xp: 10),
-      });
+      final stats = BadgeStats.from(
+        progress: {
+          'a': done('a', accuracy: 1, xp: 60),
+          'b': done('b', xp: 50),
+          // Bandyta, bet nebaigta (< 60 %) – neskaičiuojama.
+          'c': done('c', accuracy: 0.4, xp: 10),
+        },
+      );
       expect(stats.completedLessons, 2);
       expect(stats.perfectLessons, 1);
       expect(stats.totalXp, 120);
@@ -54,8 +59,11 @@ void main() {
       final all = BadgeStats.from(progress: {'l1': done('l1'), 'l2': done('l2')}, catalog: catalog);
       expect(rule.isMet(all), isTrue);
       expect(const UnitCompletedRule('wild-u02').isMet(all), isFalse, reason: 'skyriaus kataloge nėra');
-      expect(rule.isMet(BadgeStats.from(progress: {'l1': done('l1'), 'l2': done('l2')})), isFalse,
-          reason: 'be katalogo nežinome skyriaus pamokų');
+      expect(
+        rule.isMet(BadgeStats.from(progress: {'l1': done('l1'), 'l2': done('l2')})),
+        isFalse,
+        reason: 'be katalogo nežinome skyriaus pamokų',
+      );
     });
 
     test('nežinomas taisyklės tipas – niekada neįvykdomas', () {
@@ -106,16 +114,17 @@ void main() {
     });
 
     test('Supabase migracija turi tuos pačius ženklelius ir taisykles', () {
-      final sql = Directory('supabase/migrations')
-          .listSync()
-          .whereType<File>()
-          .firstWhere((f) => f.path.endsWith('_badges_profiles.sql'))
-          .readAsStringSync();
+      final sql = Directory(
+        'supabase/migrations',
+      ).listSync().whereType<File>().firstWhere((f) => f.path.endsWith('_badges_profiles.sql')).readAsStringSync();
       for (final raw in (jsonDecode(File('assets/badges.json').readAsStringSync()) as Json)['badges'] as List) {
         final b = raw as Json;
         expect(sql, contains("('${b['id']}', "), reason: '${b['id']} nėra migracijoje');
-        expect(sql, contains("'${jsonEncode(b['rule']).replaceAll(',', ', ').replaceAll(':', ': ')}'::jsonb"),
-            reason: '${b['id']} taisyklė skiriasi');
+        expect(
+          sql,
+          contains("'${jsonEncode(b['rule']).replaceAll(',', ', ').replaceAll(':', ': ')}'::jsonb"),
+          reason: '${b['id']} taisyklė skiriasi',
+        );
       }
     });
   });

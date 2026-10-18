@@ -21,26 +21,23 @@ class _Probe {
   List<String> order = const [];
 }
 
-Future<_Probe> _pumpView(
-  WidgetTester tester, {
-  OrderStepsItem item = _item,
-  bool locked = false,
-  int seed = 1,
-}) async {
+Future<_Probe> _pumpView(WidgetTester tester, {OrderStepsItem item = _item, bool locked = false, int seed = 1}) async {
   final probe = _Probe();
-  await tester.pumpWidget(MaterialApp(
-    home: Scaffold(
-      body: SingleChildScrollView(
-        child: OrderStepsView(
-          key: UniqueKey(),
-          item: item,
-          locked: locked,
-          random: Random(seed),
-          onOrderChanged: (ids) => probe.order = ids,
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Scaffold(
+        body: SingleChildScrollView(
+          child: OrderStepsView(
+            key: UniqueKey(),
+            item: item,
+            locked: locked,
+            random: Random(seed),
+            onOrderChanged: (ids) => probe.order = ids,
+          ),
         ),
       ),
     ),
-  ));
+  );
   await tester.pumpAndSettle();
   return probe;
 }
@@ -83,9 +80,7 @@ void main() {
 
   testWidgets('po neteisingo atsakymo pozicijos pažymimos ir parodoma teisinga tvarka', (tester) async {
     final probe = await _pumpView(tester, locked: true);
-    final inPlace = [
-      for (final (i, id) in probe.order.indexed) _item.correctOrder[i] == id,
-    ];
+    final inPlace = [for (final (i, id) in probe.order.indexed) _item.correctOrder[i] == id];
 
     expect(find.byIcon(Icons.check_circle), findsNWidgets(inPlace.where((x) => x).length));
     expect(find.byIcon(Icons.cancel), findsNWidgets(inPlace.where((x) => !x).length));

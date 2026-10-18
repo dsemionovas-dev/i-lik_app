@@ -80,8 +80,7 @@ class _ScenarioOptionCard extends StatelessWidget {
       OptionAnswerState.idle => (scheme.outlineVariant, 1.0, Icons.radio_button_unchecked, scheme.outline),
       OptionAnswerState.selected => (scheme.primary, 2.5, Icons.radio_button_checked, scheme.primary),
       OptionAnswerState.correct ||
-      OptionAnswerState.missedCorrect =>
-        (theme.correctColor, 2.5, Icons.check_circle, theme.correctColor),
+      OptionAnswerState.missedCorrect => (theme.correctColor, 2.5, Icons.check_circle, theme.correctColor),
       OptionAnswerState.wrong => (theme.incorrectColor, 2.5, Icons.cancel, theme.incorrectColor),
       OptionAnswerState.dimmed => (scheme.outlineVariant, 1.0, Icons.radio_button_unchecked, scheme.outline),
     };
@@ -120,9 +119,7 @@ class _ScenarioOptionCard extends StatelessWidget {
                     alignment: Alignment.topCenter,
                     child: _showsOutcome
                         ? _Outcome(
-                            title: state == OptionAnswerState.missedCorrect
-                                ? 'Teisingas kelias'
-                                : 'Pasekmė',
+                            title: state == OptionAnswerState.missedCorrect ? 'Teisingas kelias' : 'Pasekmė',
                             text: option.outcome!,
                             color: border,
                           )
@@ -151,7 +148,9 @@ class _Outcome extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(top: 12, left: 36),
       padding: const EdgeInsets.only(left: 12),
-      decoration: BoxDecoration(border: Border(left: BorderSide(color: color, width: 3))),
+      decoration: BoxDecoration(
+        border: Border(left: BorderSide(color: color, width: 3)),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 4,

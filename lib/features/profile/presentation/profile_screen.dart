@@ -70,14 +70,18 @@ class _Stats extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(child: _StatTile(value: '${progress.totalXp}', label: 'XP')),
+              Expanded(
+                child: _StatTile(value: '${progress.totalXp}', label: 'XP'),
+              ),
               Expanded(
                 child: _StatTile(
                   value: '${Streak.of(progress.activityDays, today: DateTime.now()).current}',
                   label: 'Serija (d.)',
                 ),
               ),
-              Expanded(child: _StatTile(value: '${progress.completedLessons}', label: 'Baigtos pamokos')),
+              Expanded(
+                child: _StatTile(value: '${progress.completedLessons}', label: 'Baigtos pamokos'),
+              ),
             ],
           ),
           if (progress.syncEnabled && progress.pending > 0)
@@ -160,7 +164,11 @@ class _ProfileHeader extends ConsumerWidget {
       leading: CircleAvatar(
         radius: 28,
         backgroundColor: theme.colorScheme.primaryContainer,
-        child: Text(state.profile.avatarEmoji, key: const ValueKey('profile-avatar'), style: const TextStyle(fontSize: 28)),
+        child: Text(
+          state.profile.avatarEmoji,
+          key: const ValueKey('profile-avatar'),
+          style: const TextStyle(fontSize: 28),
+        ),
       ),
       title: Text(state.displayName, key: const ValueKey('profile-name'), style: theme.textTheme.titleLarge),
       subtitle: Text(user == null ? 'Neprisijungta' : (user.isAnonymous ? 'Svečias' : user.email ?? '')),

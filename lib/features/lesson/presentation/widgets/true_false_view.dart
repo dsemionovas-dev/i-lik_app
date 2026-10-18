@@ -27,10 +27,10 @@ class TrueFalseView extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     OptionAnswerState stateOf(bool value) => OptionAnswerState.resolve(
-          selected: answer == value,
-          isCorrectOption: item.correctAnswer == value,
-          locked: locked,
-        );
+      selected: answer == value,
+      isCorrectOption: item.correctAnswer == value,
+      locked: locked,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -92,10 +92,27 @@ class _AnswerButton extends StatelessWidget {
     final (Color border, double width, Color fill, IconData shownIcon, Color iconColor) = switch (state) {
       OptionAnswerState.idle => (scheme.outlineVariant, 1.0, scheme.surfaceContainerLow, icon, scheme.onSurfaceVariant),
       OptionAnswerState.selected => (scheme.primary, 3.0, scheme.primaryContainer, icon, scheme.primary),
-      OptionAnswerState.correct || OptionAnswerState.missedCorrect =>
-        (theme.correctColor, 3.0, scheme.surfaceContainerLow, Icons.check_circle, theme.correctColor),
-      OptionAnswerState.wrong => (theme.incorrectColor, 3.0, scheme.surfaceContainerLow, Icons.cancel, theme.incorrectColor),
-      OptionAnswerState.dimmed => (scheme.outlineVariant, 1.0, scheme.surfaceContainerLow, icon, scheme.onSurfaceVariant),
+      OptionAnswerState.correct || OptionAnswerState.missedCorrect => (
+        theme.correctColor,
+        3.0,
+        scheme.surfaceContainerLow,
+        Icons.check_circle,
+        theme.correctColor,
+      ),
+      OptionAnswerState.wrong => (
+        theme.incorrectColor,
+        3.0,
+        scheme.surfaceContainerLow,
+        Icons.cancel,
+        theme.incorrectColor,
+      ),
+      OptionAnswerState.dimmed => (
+        scheme.outlineVariant,
+        1.0,
+        scheme.surfaceContainerLow,
+        icon,
+        scheme.onSurfaceVariant,
+      ),
     };
 
     return Semantics(

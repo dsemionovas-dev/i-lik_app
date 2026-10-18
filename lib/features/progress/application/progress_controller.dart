@@ -115,5 +115,4 @@ class ProgressController extends AsyncNotifier<ProgressState> {
   }
 }
 
-final progressControllerProvider =
-    AsyncNotifierProvider<ProgressController, ProgressState>(ProgressController.new);
+final progressControllerProvider = AsyncNotifierProvider<ProgressController, ProgressState>(ProgressController.new);

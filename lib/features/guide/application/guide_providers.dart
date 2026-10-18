@@ -56,14 +56,16 @@ class GuideChecklistController extends Notifier<Set<String>> {
   }
 }
 
-final guideChecklistProvider =
-    NotifierProvider.family<GuideChecklistController, Set<String>, String>(GuideChecklistController.new);
+final guideChecklistProvider = NotifierProvider.family<GuideChecklistController, Set<String>, String>(
+  GuideChecklistController.new,
+);
 
 /// Skambinimas / nuorodos atidarymas; testuose perrašoma.
 typedef UrlOpener = Future<bool> Function(Uri uri);
 
 final urlOpenerProvider = Provider<UrlOpener>(
-  (ref) => (uri) => launchUrl(uri, mode: LaunchMode.externalApplication),
+  (ref) =>
+      (uri) => launchUrl(uri, mode: LaunchMode.externalApplication),
 );
 
 final emergencyNumber = Uri(scheme: 'tel', path: '112');

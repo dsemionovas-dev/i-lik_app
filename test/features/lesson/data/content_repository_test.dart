@@ -17,20 +17,20 @@ Json lessonJson({String id = 'nav-u02-l03', int version = 4, String title = 'Kom
 }
 
 ContentCatalog catalogWith(Map<String, int> versions, {String unitId = 'nav-u02'}) => ContentCatalog(
-      courses: const [Course(id: 'navigation', title: 'Navigacija', order: 3)],
-      units: [CourseUnit(id: unitId, courseId: 'navigation', title: 'Kompasas', order: 2)],
-      lessons: [
-        for (final (i, MapEntry(key: id, value: v)) in versions.entries.indexed)
-          LessonSummary(
-            id: id,
-            courseId: 'navigation',
-            unitId: id.startsWith('other') ? 'other-unit' : unitId,
-            title: id,
-            order: i,
-            version: v,
-          ),
-      ],
-    );
+  courses: const [Course(id: 'navigation', title: 'Navigacija', order: 3)],
+  units: [CourseUnit(id: unitId, courseId: 'navigation', title: 'Kompasas', order: 2)],
+  lessons: [
+    for (final (i, MapEntry(key: id, value: v)) in versions.entries.indexed)
+      LessonSummary(
+        id: id,
+        courseId: 'navigation',
+        unitId: id.startsWith('other') ? 'other-unit' : unitId,
+        title: id,
+        order: i,
+        version: v,
+      ),
+  ],
+);
 
 final bundledCatalog = jsonEncode(catalogWith({'nav-u02-l03': 4}).toJson());
 
@@ -39,13 +39,12 @@ void main() {
   late InMemoryLessonCache cache;
   late MapAssetBundle assets;
 
-  ContentRepository repo({bool online = true, Duration timeout = const Duration(seconds: 1)}) =>
-      ContentRepository(
-        remote: online ? remote : null,
-        cache: cache,
-        bundled: BundledContentSource(assets),
-        timeout: timeout,
-      );
+  ContentRepository repo({bool online = true, Duration timeout = const Duration(seconds: 1)}) => ContentRepository(
+    remote: online ? remote : null,
+    cache: cache,
+    bundled: BundledContentSource(assets),
+    timeout: timeout,
+  );
 
   setUp(() {
     remote = FakeRemoteDataSource();

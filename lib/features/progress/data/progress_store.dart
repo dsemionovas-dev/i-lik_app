@@ -14,9 +14,9 @@ class ProgressSnapshot {
     Map<String, UserProgress>? progress,
     List<LessonAttempt>? outbox,
     Set<String>? activityDays,
-  })  : progress = progress ?? {},
-        outbox = outbox ?? [],
-        activityDays = activityDays ?? {};
+  }) : progress = progress ?? {},
+       outbox = outbox ?? [],
+       activityDays = activityDays ?? {};
 
   /// Kieno tai duomenys; pasikeitus vartotojui vietinė kopija nebetinka.
   String? ownerId;
@@ -27,20 +27,18 @@ class ProgressSnapshot {
   final Set<String> activityDays;
 
   factory ProgressSnapshot.fromJson(Json json) => ProgressSnapshot(
-        ownerId: json['ownerId'] as String?,
-        progress: {
-          for (final p in parseList(json['progress'], UserProgress.fromLocalJson)) p.lessonId: p,
-        },
-        outbox: parseList(json['outbox'], LessonAttempt.fromJson),
-        activityDays: {...parseStringList(json['activityDays'])},
-      );
+    ownerId: json['ownerId'] as String?,
+    progress: {for (final p in parseList(json['progress'], UserProgress.fromLocalJson)) p.lessonId: p},
+    outbox: parseList(json['outbox'], LessonAttempt.fromJson),
+    activityDays: {...parseStringList(json['activityDays'])},
+  );
 
   Json toJson() => {
-        'ownerId': ownerId,
-        'progress': progress.values.map((p) => p.toLocalJson()).toList(),
-        'outbox': outbox.map((a) => a.toJson()).toList(),
-        'activityDays': (activityDays.toList()..sort()),
-      };
+    'ownerId': ownerId,
+    'progress': progress.values.map((p) => p.toLocalJson()).toList(),
+    'outbox': outbox.map((a) => a.toJson()).toList(),
+    'activityDays': (activityDays.toList()..sort()),
+  };
 }
 
 abstract interface class ProgressStore {
@@ -54,8 +52,7 @@ class FileProgressStore implements ProgressStore {
 
   final Future<File> Function() _file;
 
-  static Future<File> _defaultFile() async =>
-      File('${(await getApplicationSupportDirectory()).path}/progress.json');
+  static Future<File> _defaultFile() async => File('${(await getApplicationSupportDirectory()).path}/progress.json');
 
   @override
   Future<ProgressSnapshot?> read() async {

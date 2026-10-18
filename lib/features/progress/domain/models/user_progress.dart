@@ -10,8 +10,7 @@ enum LessonProgressStatus {
   const LessonProgressStatus(this.key);
   final String key;
 
-  static LessonProgressStatus fromKey(String key) =>
-      values.firstWhere((s) => s.key == key, orElse: () => inProgress);
+  static LessonProgressStatus fromKey(String key) => values.firstWhere((s) => s.key == key, orElse: () => inProgress);
 }
 
 /// Vartotojo progresas vienoje pamokoje. Laukai snake_case, nes tai
@@ -55,14 +54,13 @@ class UserProgress {
     required String lessonId,
     required int lessonVersion,
     required DateTime at,
-  }) =>
-      UserProgress(
-        userId: userId,
-        lessonId: lessonId,
-        lessonVersion: lessonVersion,
-        status: LessonProgressStatus.inProgress,
-        updatedAt: at,
-      );
+  }) => UserProgress(
+    userId: userId,
+    lessonId: lessonId,
+    lessonVersion: lessonVersion,
+    status: LessonProgressStatus.inProgress,
+    updatedAt: at,
+  );
 
   bool get isCompleted => status != LessonProgressStatus.inProgress;
 
@@ -106,34 +104,33 @@ class UserProgress {
     DateTime? completedAt,
     DateTime? updatedAt,
     bool? isSynced,
-  }) =>
-      UserProgress(
-        userId: userId,
-        lessonId: lessonId,
-        lessonVersion: lessonVersion ?? this.lessonVersion,
-        status: status ?? this.status,
-        stars: stars ?? this.stars,
-        bestAccuracy: bestAccuracy ?? this.bestAccuracy,
-        xpEarned: xpEarned ?? this.xpEarned,
-        attempts: attempts ?? this.attempts,
-        completedAt: completedAt ?? this.completedAt,
-        updatedAt: updatedAt ?? this.updatedAt,
-        isSynced: isSynced ?? this.isSynced,
-      );
+  }) => UserProgress(
+    userId: userId,
+    lessonId: lessonId,
+    lessonVersion: lessonVersion ?? this.lessonVersion,
+    status: status ?? this.status,
+    stars: stars ?? this.stars,
+    bestAccuracy: bestAccuracy ?? this.bestAccuracy,
+    xpEarned: xpEarned ?? this.xpEarned,
+    attempts: attempts ?? this.attempts,
+    completedAt: completedAt ?? this.completedAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    isSynced: isSynced ?? this.isSynced,
+  );
 
   factory UserProgress.fromJson(Json json) => UserProgress(
-        userId: json['user_id'] as String,
-        lessonId: json['lesson_id'] as String,
-        lessonVersion: json['lesson_version'] as int,
-        status: LessonProgressStatus.fromKey(json['status'] as String),
-        stars: json['stars'] as int? ?? 0,
-        bestAccuracy: (json['best_accuracy'] as num?)?.toDouble() ?? 0,
-        xpEarned: json['xp_earned'] as int? ?? 0,
-        attempts: json['attempts'] as int? ?? 0,
-        completedAt: parseDate(json['completed_at']),
-        updatedAt: DateTime.parse(json['updated_at'] as String),
-        isSynced: true,
-      );
+    userId: json['user_id'] as String,
+    lessonId: json['lesson_id'] as String,
+    lessonVersion: json['lesson_version'] as int,
+    status: LessonProgressStatus.fromKey(json['status'] as String),
+    stars: json['stars'] as int? ?? 0,
+    bestAccuracy: (json['best_accuracy'] as num?)?.toDouble() ?? 0,
+    xpEarned: json['xp_earned'] as int? ?? 0,
+    attempts: json['attempts'] as int? ?? 0,
+    completedAt: parseDate(json['completed_at']),
+    updatedAt: DateTime.parse(json['updated_at'] as String),
+    isSynced: true,
+  );
 
   /// Vietinė kopija – su [isSynced] žyme.
   factory UserProgress.fromLocalJson(Json json) =>
@@ -142,15 +139,15 @@ class UserProgress {
   Json toLocalJson() => {...toJson(), 'is_synced': isSynced};
 
   Json toJson() => {
-        'user_id': userId,
-        'lesson_id': lessonId,
-        'lesson_version': lessonVersion,
-        'status': status.key,
-        'stars': stars,
-        'best_accuracy': bestAccuracy,
-        'xp_earned': xpEarned,
-        'attempts': attempts,
-        'completed_at': completedAt?.toUtc().toIso8601String(),
-        'updated_at': updatedAt.toUtc().toIso8601String(),
-      };
+    'user_id': userId,
+    'lesson_id': lessonId,
+    'lesson_version': lessonVersion,
+    'status': status.key,
+    'stars': stars,
+    'best_accuracy': bestAccuracy,
+    'xp_earned': xpEarned,
+    'attempts': attempts,
+    'completed_at': completedAt?.toUtc().toIso8601String(),
+    'updated_at': updatedAt.toUtc().toIso8601String(),
+  };
 }

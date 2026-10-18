@@ -91,10 +91,7 @@ class _OrderStepsViewState extends State<OrderStepsView> {
               shape: reveal
                   ? RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(
-                        color: inPlace ? theme.correctColor : theme.incorrectColor,
-                        width: 2,
-                      ),
+                      side: BorderSide(color: inPlace ? theme.correctColor : theme.incorrectColor, width: 2),
                     )
                   : null,
               child: ListTile(

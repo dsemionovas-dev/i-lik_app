@@ -6,26 +6,33 @@ import 'package:islik/features/lesson/domain/models/catalog.dart';
 import 'package:islik/features/lesson_tree/presentation/lesson_tree_screen.dart';
 
 ContentCatalog _catalog(ContentSource source) => ContentCatalog(
-      source: source,
-      courses: const [
-        Course(id: 'civil', title: 'Pilietinis saugumas', order: 4),
-        Course(id: 'navigation', title: 'Navigacija', order: 3),
-      ],
-      units: const [CourseUnit(id: 'nav-u02', courseId: 'navigation', title: 'Kompasas', order: 2)],
-      lessons: const [
-        LessonSummary(id: 'b', courseId: 'navigation', unitId: 'nav-u02', title: 'Rūke', order: 4, version: 1),
-        LessonSummary(
-          id: 'a', courseId: 'navigation', unitId: 'nav-u02', title: 'Azimutas', order: 3, version: 4,
-          estimatedMinutes: 6,
-        ),
-      ],
-    );
+  source: source,
+  courses: const [
+    Course(id: 'civil', title: 'Pilietinis saugumas', order: 4),
+    Course(id: 'navigation', title: 'Navigacija', order: 3),
+  ],
+  units: const [CourseUnit(id: 'nav-u02', courseId: 'navigation', title: 'Kompasas', order: 2)],
+  lessons: const [
+    LessonSummary(id: 'b', courseId: 'navigation', unitId: 'nav-u02', title: 'Rūke', order: 4, version: 1),
+    LessonSummary(
+      id: 'a',
+      courseId: 'navigation',
+      unitId: 'nav-u02',
+      title: 'Azimutas',
+      order: 3,
+      version: 4,
+      estimatedMinutes: 6,
+    ),
+  ],
+);
 
 Future<void> _pump(WidgetTester tester, Future<ContentCatalog> Function() load) async {
-  await tester.pumpWidget(ProviderScope(
-    overrides: [catalogProvider.overrideWith((ref) => load())],
-    child: const MaterialApp(home: LessonTreeScreen()),
-  ));
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [catalogProvider.overrideWith((ref) => load())],
+      child: const MaterialApp(home: LessonTreeScreen()),
+    ),
+  );
   await tester.pumpAndSettle();
 }
 

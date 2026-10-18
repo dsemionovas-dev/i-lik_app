@@ -48,8 +48,8 @@ class InMemoryLessonCache implements LessonCache {
 /// Valdomas „serveris“: galima įjungti gedimą ir skaičiuoti užklausas.
 class FakeRemoteDataSource implements LessonRemoteDataSource {
   FakeRemoteDataSource({ContentCatalog? catalog, Map<String, Json>? lessons})
-      : catalog = catalog ?? ContentCatalog(courses: const [], units: const [], lessons: const []),
-        lessons = lessons ?? {};
+    : catalog = catalog ?? ContentCatalog(courses: const [], units: const [], lessons: const []),
+      lessons = lessons ?? {};
 
   ContentCatalog catalog;
   final Map<String, Json> lessons;
@@ -127,11 +127,12 @@ class FakeProgressRemote implements ProgressRemoteDataSource {
     if (error != null) throw error;
     if (received.any((r) => r.id == a.id)) return;
     received.add(a);
-    final current = rows[a.lessonId] ??
+    final current =
+        rows[a.lessonId] ??
         UserProgress.empty(userId: userId, lessonId: a.lessonId, lessonVersion: a.lessonVersion, at: a.completedAt);
-    rows[a.lessonId] =
-        current.withAttempt(accuracy: a.accuracy, xp: a.xp, at: a.completedAt, lessonVersion: a.lessonVersion)
-            .copyWith(isSynced: true);
+    rows[a.lessonId] = current
+        .withAttempt(accuracy: a.accuracy, xp: a.xp, at: a.completedAt, lessonVersion: a.lessonVersion)
+        .copyWith(isSynced: true);
   }
 
   @override
@@ -177,15 +178,15 @@ class FakeAuthRepository implements AuthRepository {
 
   @override
   Future<AppUser> ensureSignedIn() => _call('ensureSignedIn', () {
-        if (_user == null) setUser(const AppUser(id: 'guest-1', isAnonymous: true));
-        return _user!;
-      });
+    if (_user == null) setUser(const AppUser(id: 'guest-1', isAnonymous: true));
+    return _user!;
+  });
 
   @override
   Future<AppUser> signInWithEmail(String email, String password) => _call('signIn:$email', () {
-        setUser(AppUser(id: 'user-$email', email: email));
-        return _user!;
-      });
+    setUser(AppUser(id: 'user-$email', email: email));
+    return _user!;
+  });
 
   @override
   Future<bool> signUpWithEmail(String email, String password) => _call('signUp:$email', () => true);
@@ -195,17 +196,17 @@ class FakeAuthRepository implements AuthRepository {
 
   @override
   Future<void> setPassword(String password) => _call('setPassword', () {
-        final u = _user!;
-        setUser(AppUser(id: u.id, email: u.email, isAnonymous: u.isAnonymous));
-      });
+    final u = _user!;
+    setUser(AppUser(id: u.id, email: u.email, isAnonymous: u.isAnonymous));
+  });
 
   /// Imituoja, kad vartotojas tuo metu patvirtino el. paštą naršyklėje.
   AppUser? afterRefresh;
 
   @override
   Future<void> refreshUser() => _call('refreshUser', () {
-        if (afterRefresh != null) setUser(afterRefresh);
-      });
+    if (afterRefresh != null) setUser(afterRefresh);
+  });
 
   /// Teisingas atstatymo kodas.
   String resetCode = '123456';
@@ -218,10 +219,10 @@ class FakeAuthRepository implements AuthRepository {
 
   @override
   Future<AppUser> verifyPasswordResetCode(String email, String code) => _call('verify:$code', () {
-        if (code != resetCode) throw const AuthFailure('Kodas neteisingas arba nebegalioja. Paprašykite naujo.');
-        setUser(AppUser(id: 'user-$email', email: email));
-        return _user!;
-      });
+    if (code != resetCode) throw const AuthFailure('Kodas neteisingas arba nebegalioja. Paprašykite naujo.');
+    setUser(AppUser(id: 'user-$email', email: email));
+    return _user!;
+  });
 
   @override
   Stream<void> passwordRecoveryEvents() => _recoveries.stream;
@@ -254,20 +255,29 @@ LeagueStanding leagueOf(
   bool joined = true,
   LeagueLastWeek? lastWeek,
   DateTime? weekEnd,
-}) =>
-    LeagueStanding(
-      tier: tier,
-      tierName: const ['Pradinukas', 'Stovyklautojas', 'Žygeivis', 'Pėdsekys', 'Orientuotojas',
-          'Skautas', 'Tyrinėtojas', 'Gelbėtojas', 'Instruktorius', 'Rangeris'][tier - 1],
-      weekStart: DateTime.utc(2026, 10, 12),
-      weekEnd: weekEnd ?? DateTime.utc(2026, 10, 18, 21),
-      joined: joined,
-      lastWeek: lastWeek,
-      members: [
-        for (final (i, x) in xp.indexed)
-          LeagueMember(rank: i + 1, displayName: 'Žygeivis ${i + 1}', weeklyXp: x, isMe: meAt == i + 1),
-      ],
-    );
+}) => LeagueStanding(
+  tier: tier,
+  tierName: const [
+    'Pradinukas',
+    'Stovyklautojas',
+    'Žygeivis',
+    'Pėdsekys',
+    'Orientuotojas',
+    'Skautas',
+    'Tyrinėtojas',
+    'Gelbėtojas',
+    'Instruktorius',
+    'Rangeris',
+  ][tier - 1],
+  weekStart: DateTime.utc(2026, 10, 12),
+  weekEnd: weekEnd ?? DateTime.utc(2026, 10, 18, 21),
+  joined: joined,
+  lastWeek: lastWeek,
+  members: [
+    for (final (i, x) in xp.indexed)
+      LeagueMember(rank: i + 1, displayName: 'Žygeivis ${i + 1}', weeklyXp: x, isMe: meAt == i + 1),
+  ],
+);
 
 class InMemoryGuideCache implements GuideCache {
   Json? saved;

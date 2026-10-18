@@ -14,14 +14,13 @@ void main() {
   String? userId;
   var clock = DateTime.utc(2026, 10, 18, 9);
 
-  ProgressService service({bool online = true, Duration timeout = const Duration(seconds: 1)}) =>
-      ProgressService(
-        store: store,
-        remote: online ? remote : null,
-        resolveUserId: () async => userId,
-        clock: () => clock,
-        timeout: timeout,
-      );
+  ProgressService service({bool online = true, Duration timeout = const Duration(seconds: 1)}) => ProgressService(
+    store: store,
+    remote: online ? remote : null,
+    resolveUserId: () async => userId,
+    clock: () => clock,
+    timeout: timeout,
+  );
 
   Future<void> record(ProgressService s, String lessonId, double accuracy, int xp) =>
       s.recordAttempt(lessonId: lessonId, lessonVersion: 4, accuracy: accuracy, xp: xp);
@@ -79,8 +78,12 @@ void main() {
       final s = service();
       await record(s, 'l1', 0.8, 20);
       // Kitame įrenginyje jau buvo bandymų – serveris žino daugiau.
-      remote.rows['l2'] = UserProgress.empty(userId: 'user-1', lessonId: 'l2', lessonVersion: 1, at: clock)
-          .withAttempt(accuracy: 1, xp: 30, at: clock, lessonVersion: 1);
+      remote.rows['l2'] = UserProgress.empty(
+        userId: 'user-1',
+        lessonId: 'l2',
+        lessonVersion: 1,
+        at: clock,
+      ).withAttempt(accuracy: 1, xp: 30, at: clock, lessonVersion: 1);
 
       final result = await s.sync();
 

@@ -12,41 +12,36 @@ class AuthController extends AsyncNotifier<String?> {
   @override
   Future<String?> build() async => null;
 
-  Future<bool> signIn(String email, String password) =>
-      _run(() async {
-        _validate(email, password);
-        await _repo.signInWithEmail(email, password);
-        return null;
-      });
+  Future<bool> signIn(String email, String password) => _run(() async {
+    _validate(email, password);
+    await _repo.signInWithEmail(email, password);
+    return null;
+  });
 
-  Future<bool> signUp(String email, String password) =>
-      _run(() async {
-        _validate(email, password);
-        final needsConfirmation = await _repo.signUpWithEmail(email, password);
-        return needsConfirmation ? 'Patvirtinkite el. paštą – nuoroda išsiųsta laišku.' : null;
-      });
+  Future<bool> signUp(String email, String password) => _run(() async {
+    _validate(email, password);
+    final needsConfirmation = await _repo.signUpWithEmail(email, password);
+    return needsConfirmation ? 'Patvirtinkite el. paštą – nuoroda išsiųsta laišku.' : null;
+  });
 
-  Future<bool> linkEmail(String email) =>
-      _run(() async {
-        _validateEmail(email);
-        await _repo.linkEmail(email);
-        return 'Patvirtinkite el. paštą – po to galėsite prisijungti bet kuriame įrenginyje.';
-      });
+  Future<bool> linkEmail(String email) => _run(() async {
+    _validateEmail(email);
+    await _repo.linkEmail(email);
+    return 'Patvirtinkite el. paštą – po to galėsite prisijungti bet kuriame įrenginyje.';
+  });
 
-  Future<bool> setPassword(String password, String confirmation) =>
-      _run(() async {
-        validateNewPassword(password, confirmation);
-        await _repo.setPassword(password);
-        return 'Slaptažodis nustatytas – dabar galite prisijungti bet kuriame įrenginyje.';
-      });
+  Future<bool> setPassword(String password, String confirmation) => _run(() async {
+    validateNewPassword(password, confirmation);
+    await _repo.setPassword(password);
+    return 'Slaptažodis nustatytas – dabar galite prisijungti bet kuriame įrenginyje.';
+  });
 
   /// 1 žingsnis: atstatymo laiškas. Pranešimas sąmoningai neatskleidžia, ar paskyra yra.
-  Future<bool> requestPasswordReset(String email) =>
-      _run(() async {
-        _validateEmail(email);
-        await _repo.sendPasswordReset(email);
-        return 'Jei paskyra su šiuo el. paštu yra, išsiuntėme laišką su 6 skaitmenų kodu.';
-      });
+  Future<bool> requestPasswordReset(String email) => _run(() async {
+    _validateEmail(email);
+    await _repo.sendPasswordReset(email);
+    return 'Jei paskyra su šiuo el. paštu yra, išsiuntėme laišką su 6 skaitmenų kodu.';
+  });
 
   /// 2 žingsnis: kodas iš laiško + naujas slaptažodis.
   Future<bool> resetPassword({
@@ -54,17 +49,16 @@ class AuthController extends AsyncNotifier<String?> {
     required String code,
     required String password,
     required String confirmation,
-  }) =>
-      _run(() async {
-        if (!RegExp(r'^\d{6}$').hasMatch(code.trim())) {
-          throw const AuthFailure('Įveskite 6 skaitmenų kodą iš laiško.');
-        }
-        // Slaptažodį tikrinam prieš kodą – kad neišnaudotume vienkartinio kodo veltui.
-        validateNewPassword(password, confirmation);
-        await _repo.verifyPasswordResetCode(email, code);
-        await _repo.setPassword(password);
-        return 'Slaptažodis pakeistas – esate prisijungę.';
-      });
+  }) => _run(() async {
+    if (!RegExp(r'^\d{6}$').hasMatch(code.trim())) {
+      throw const AuthFailure('Įveskite 6 skaitmenų kodą iš laiško.');
+    }
+    // Slaptažodį tikrinam prieš kodą – kad neišnaudotume vienkartinio kodo veltui.
+    validateNewPassword(password, confirmation);
+    await _repo.verifyPasswordResetCode(email, code);
+    await _repo.setPassword(password);
+    return 'Slaptažodis pakeistas – esate prisijungę.';
+  });
 
   /// Naujo slaptažodžio taisyklės (Supabase pusėje rekomenduojama tokias pat įjungti).
   static void validateNewPassword(String password, String confirmation) {
@@ -76,9 +70,9 @@ class AuthController extends AsyncNotifier<String?> {
   }
 
   Future<bool> signOut() => _run(() async {
-        await _repo.signOut();
-        return null;
-      });
+    await _repo.signOut();
+    return null;
+  });
 
   Future<bool> _run(Future<String?> Function() action) async {
     state = const AsyncLoading();

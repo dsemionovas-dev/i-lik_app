@@ -22,11 +22,7 @@ class SettingsScreen extends StatelessWidget {
             onTap: () => context.push(Routes.report()),
           ),
           const Divider(),
-          const ListTile(
-            leading: Icon(Icons.info_outline),
-            title: Text('Versija'),
-            subtitle: Text(Env.appVersion),
-          ),
+          const ListTile(leading: Icon(Icons.info_outline), title: Text('Versija'), subtitle: Text(Env.appVersion)),
         ],
       ),
     );

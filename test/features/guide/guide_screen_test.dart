@@ -22,26 +22,36 @@ Future<void> _pump(WidgetTester tester, {String location = '/guide', Map<String,
   rootBundle.clear();
   SharedPreferences.setMockInitialValues(prefs);
   final sp = await SharedPreferences.getInstance();
-  final router = GoRouter(initialLocation: location, routes: [
-    GoRoute(
-      path: '/guide',
-      builder: (_, _) => const GuideScreen(),
-      routes: [GoRoute(path: ':id', builder: (_, s) => GuideCardScreen(cardId: s.pathParameters['id']!))],
-    ),
-  ]);
-  await tester.pumpWidget(ProviderScope(
-    overrides: [
-      sharedPreferencesProvider.overrideWithValue(sp),
-      guideRepositoryProvider.overrideWithValue(
-        GuideRepository(cache: InMemoryGuideCache(), remote: remote, bundle: rootBundle),
+  final router = GoRouter(
+    initialLocation: location,
+    routes: [
+      GoRoute(
+        path: '/guide',
+        builder: (_, _) => const GuideScreen(),
+        routes: [
+          GoRoute(
+            path: ':id',
+            builder: (_, s) => GuideCardScreen(cardId: s.pathParameters['id']!),
+          ),
+        ],
       ),
-      urlOpenerProvider.overrideWithValue((uri) async {
-        opened.add(uri);
-        return true;
-      }),
     ],
-    child: MaterialApp.router(routerConfig: router),
-  ));
+  );
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(sp),
+        guideRepositoryProvider.overrideWithValue(
+          GuideRepository(cache: InMemoryGuideCache(), remote: remote, bundle: rootBundle),
+        ),
+        urlOpenerProvider.overrideWithValue((uri) async {
+          opened.add(uri);
+          return true;
+        }),
+      ],
+      child: MaterialApp.router(routerConfig: router),
+    ),
+  );
   await tester.pumpAndSettle();
 }
 
@@ -145,8 +155,16 @@ void main() {
     final cards = [
       ...json['cards'] as List,
       {
-        'id': 'nauja', 'categoryId': 'crisis', 'title': 'Nauja atmintinė', 'summary': 'Iš serverio',
-        'blocks': [{'kind': 'text', 'text': 'Tekstas'}], 'sources': [{'title': 'X'}],
+        'id': 'nauja',
+        'categoryId': 'crisis',
+        'title': 'Nauja atmintinė',
+        'summary': 'Iš serverio',
+        'blocks': [
+          {'kind': 'text', 'text': 'Tekstas'},
+        ],
+        'sources': [
+          {'title': 'X'},
+        ],
       },
     ];
     remote.guide = {...json, 'version': 2, 'cards': cards};

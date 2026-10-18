@@ -11,25 +11,26 @@ const _item = TrueFalseItem(
 
 Future<List<bool>> _pump(WidgetTester tester, {bool? answer, bool locked = false}) async {
   final taps = <bool>[];
-  await tester.pumpWidget(MaterialApp(
-    home: Scaffold(
-      body: SingleChildScrollView(
-        child: TrueFalseView(item: _item, answer: answer, locked: locked, onAnswer: taps.add),
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Scaffold(
+        body: SingleChildScrollView(
+          child: TrueFalseView(item: _item, answer: answer, locked: locked, onAnswer: taps.add),
+        ),
       ),
     ),
-  ));
+  );
   await tester.pumpAndSettle();
   return taps;
 }
 
 Finder _iconOn(String label, IconData icon) => find.descendant(
-      of: find.ancestor(of: find.text(label), matching: find.byType(InkWell)),
-      matching: find.byIcon(icon),
-    );
+  of: find.ancestor(of: find.text(label), matching: find.byType(InkWell)),
+  matching: find.byIcon(icon),
+);
 
-double _opacityOf(WidgetTester tester, String label) => tester
-    .widget<Opacity>(find.ancestor(of: find.text(label), matching: find.byType(Opacity)).first)
-    .opacity;
+double _opacityOf(WidgetTester tester, String label) =>
+    tester.widget<Opacity>(find.ancestor(of: find.text(label), matching: find.byType(Opacity)).first).opacity;
 
 void main() {
   testWidgets('rodo teiginį ir du mygtukus be įvertinimo', (tester) async {

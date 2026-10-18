@@ -27,7 +27,10 @@ class SupabaseLessonRemoteDataSource implements LessonRemoteDataSource {
     try {
       (courses, units, lessons) = await (
         _client.from('courses').select('id, title, description, sort_order').order('sort_order', ascending: true),
-        _client.from('units').select('id, course_id, title, description, sort_order').order('sort_order', ascending: true),
+        _client
+            .from('units')
+            .select('id, course_id, title, description, sort_order')
+            .order('sort_order', ascending: true),
         _client
             .from('lessons')
             .select('id, course_id, unit_id, title, sort_order, version, estimated_minutes')

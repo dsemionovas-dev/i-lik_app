@@ -34,11 +34,11 @@ class ReportService {
     DateTime Function()? clock,
     Uuid uuid = const Uuid(),
     this.timeout = const Duration(seconds: 10),
-  })  : _outbox = outbox,
-        _remote = remote,
-        _ensureSignedIn = ensureSignedIn,
-        _clock = clock ?? DateTime.now,
-        _uuid = uuid;
+  }) : _outbox = outbox,
+       _remote = remote,
+       _ensureSignedIn = ensureSignedIn,
+       _clock = clock ?? DateTime.now,
+       _uuid = uuid;
 
   final ReportOutbox _outbox;
   final ReportRemoteDataSource? _remote;

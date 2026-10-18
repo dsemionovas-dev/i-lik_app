@@ -15,5 +15,4 @@ class OnboardingController extends Notifier<bool> {
   }
 }
 
-final onboardingCompletedProvider =
-    NotifierProvider<OnboardingController, bool>(OnboardingController.new);
+final onboardingCompletedProvider = NotifierProvider<OnboardingController, bool>(OnboardingController.new);

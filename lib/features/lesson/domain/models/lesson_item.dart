@@ -40,12 +40,7 @@ sealed class LessonItem {
 
 /// Teorijos kortelė be vertinimo („Supratau“).
 class InfoCardItem extends LessonItem {
-  const InfoCardItem({
-    required super.id,
-    required this.title,
-    required this.body,
-    this.image,
-  });
+  const InfoCardItem({required super.id, required this.title, required this.body, this.image});
 
   static const typeKey = 'info_card';
 
@@ -60,19 +55,14 @@ class InfoCardItem extends LessonItem {
   bool get isGraded => false;
 
   factory InfoCardItem.fromJson(Json json) => InfoCardItem(
-        id: json['id'] as String,
-        title: json['title'] as String,
-        body: json['body'] as String,
-        image: MediaImage.maybeFromJson(json['image']),
-      );
+    id: json['id'] as String,
+    title: json['title'] as String,
+    body: json['body'] as String,
+    image: MediaImage.maybeFromJson(json['image']),
+  );
 
   @override
-  Json toJson() => {
-        ..._baseJson(),
-        'title': title,
-        'body': body,
-        'image': image?.toJson(),
-      };
+  Json toJson() => {..._baseJson(), 'title': title, 'body': body, 'image': image?.toJson()};
 }
 
 enum ChoiceType {
@@ -121,31 +111,30 @@ class ChoiceItem extends LessonItem {
 
   /// Teisinga tik tada, kai pasirinkta lygiai teisingų variantų aibė.
   bool isCorrect(Set<String> selectedIds) =>
-      selectedIds.length == correctOptionIds.length &&
-      selectedIds.containsAll(correctOptionIds);
+      selectedIds.length == correctOptionIds.length && selectedIds.containsAll(correctOptionIds);
 
   factory ChoiceItem.fromJson(Json json) => ChoiceItem(
-        id: json['id'] as String,
-        choiceType: ChoiceType.fromKey(json['type'] as String)!,
-        prompt: json['prompt'] as String,
-        image: MediaImage.maybeFromJson(json['image']),
-        options: parseList(json['options'], QuestionOption.fromJson),
-        correctOptionIds: parseStringList(json['correctOptionIds']),
-        shuffleOptions: json['shuffleOptions'] as bool? ?? true,
-        feedback: ItemFeedback.fromJson(json['feedback']),
-        xp: json['xp'] as int? ?? 0,
-      );
+    id: json['id'] as String,
+    choiceType: ChoiceType.fromKey(json['type'] as String)!,
+    prompt: json['prompt'] as String,
+    image: MediaImage.maybeFromJson(json['image']),
+    options: parseList(json['options'], QuestionOption.fromJson),
+    correctOptionIds: parseStringList(json['correctOptionIds']),
+    shuffleOptions: json['shuffleOptions'] as bool? ?? true,
+    feedback: ItemFeedback.fromJson(json['feedback']),
+    xp: json['xp'] as int? ?? 0,
+  );
 
   @override
   Json toJson() => {
-        ..._baseJson(),
-        'prompt': prompt,
-        'image': image?.toJson(),
-        'options': options.map((o) => o.toJson()).toList(),
-        'correctOptionIds': correctOptionIds,
-        'shuffleOptions': shuffleOptions,
-        'feedback': feedback.toJson(),
-      };
+    ..._baseJson(),
+    'prompt': prompt,
+    'image': image?.toJson(),
+    'options': options.map((o) => o.toJson()).toList(),
+    'correctOptionIds': correctOptionIds,
+    'shuffleOptions': shuffleOptions,
+    'feedback': feedback.toJson(),
+  };
 }
 
 class TrueFalseItem extends LessonItem {
@@ -171,22 +160,22 @@ class TrueFalseItem extends LessonItem {
   bool isCorrect(bool answer) => answer == correctAnswer;
 
   factory TrueFalseItem.fromJson(Json json) => TrueFalseItem(
-        id: json['id'] as String,
-        prompt: json['prompt'] as String,
-        correctAnswer: json['correctAnswer'] as bool,
-        image: MediaImage.maybeFromJson(json['image']),
-        feedback: ItemFeedback.fromJson(json['feedback']),
-        xp: json['xp'] as int? ?? 0,
-      );
+    id: json['id'] as String,
+    prompt: json['prompt'] as String,
+    correctAnswer: json['correctAnswer'] as bool,
+    image: MediaImage.maybeFromJson(json['image']),
+    feedback: ItemFeedback.fromJson(json['feedback']),
+    xp: json['xp'] as int? ?? 0,
+  );
 
   @override
   Json toJson() => {
-        ..._baseJson(),
-        'prompt': prompt,
-        'correctAnswer': correctAnswer,
-        'image': image?.toJson(),
-        'feedback': feedback.toJson(),
-      };
+    ..._baseJson(),
+    'prompt': prompt,
+    'correctAnswer': correctAnswer,
+    'image': image?.toJson(),
+    'feedback': feedback.toJson(),
+  };
 }
 
 class OrderStep {
@@ -195,8 +184,7 @@ class OrderStep {
   final String id;
   final String text;
 
-  factory OrderStep.fromJson(Json json) =>
-      OrderStep(id: json['id'] as String, text: json['text'] as String);
+  factory OrderStep.fromJson(Json json) => OrderStep(id: json['id'] as String, text: json['text'] as String);
 
   Json toJson() => {'id': id, 'text': text};
 }
@@ -231,22 +219,22 @@ class OrderStepsItem extends LessonItem {
   }
 
   factory OrderStepsItem.fromJson(Json json) => OrderStepsItem(
-        id: json['id'] as String,
-        prompt: json['prompt'] as String,
-        steps: parseList(json['steps'], OrderStep.fromJson),
-        correctOrder: parseStringList(json['correctOrder']),
-        feedback: ItemFeedback.fromJson(json['feedback']),
-        xp: json['xp'] as int? ?? 0,
-      );
+    id: json['id'] as String,
+    prompt: json['prompt'] as String,
+    steps: parseList(json['steps'], OrderStep.fromJson),
+    correctOrder: parseStringList(json['correctOrder']),
+    feedback: ItemFeedback.fromJson(json['feedback']),
+    xp: json['xp'] as int? ?? 0,
+  );
 
   @override
   Json toJson() => {
-        ..._baseJson(),
-        'prompt': prompt,
-        'steps': steps.map((s) => s.toJson()).toList(),
-        'correctOrder': correctOrder,
-        'feedback': feedback.toJson(),
-      };
+    ..._baseJson(),
+    'prompt': prompt,
+    'steps': steps.map((s) => s.toJson()).toList(),
+    'correctOrder': correctOrder,
+    'feedback': feedback.toJson(),
+  };
 }
 
 class MatchPair {
@@ -255,8 +243,7 @@ class MatchPair {
   final String left;
   final String right;
 
-  factory MatchPair.fromJson(Json json) =>
-      MatchPair(left: json['left'] as String, right: json['right'] as String);
+  factory MatchPair.fromJson(Json json) => MatchPair(left: json['left'] as String, right: json['right'] as String);
 
   Json toJson() => {'left': left, 'right': right};
 }
@@ -282,24 +269,23 @@ class MatchPairsItem extends LessonItem {
 
   /// [matches] – kairė pusė → vartotojo pasirinkta dešinė pusė.
   bool isCorrect(Map<String, String> matches) =>
-      matches.length == pairs.length &&
-      pairs.every((p) => matches[p.left] == p.right);
+      matches.length == pairs.length && pairs.every((p) => matches[p.left] == p.right);
 
   factory MatchPairsItem.fromJson(Json json) => MatchPairsItem(
-        id: json['id'] as String,
-        prompt: json['prompt'] as String,
-        pairs: parseList(json['pairs'], MatchPair.fromJson),
-        feedback: ItemFeedback.fromJson(json['feedback']),
-        xp: json['xp'] as int? ?? 0,
-      );
+    id: json['id'] as String,
+    prompt: json['prompt'] as String,
+    pairs: parseList(json['pairs'], MatchPair.fromJson),
+    feedback: ItemFeedback.fromJson(json['feedback']),
+    xp: json['xp'] as int? ?? 0,
+  );
 
   @override
   Json toJson() => {
-        ..._baseJson(),
-        'prompt': prompt,
-        'pairs': pairs.map((p) => p.toJson()).toList(),
-        'feedback': feedback.toJson(),
-      };
+    ..._baseJson(),
+    'prompt': prompt,
+    'pairs': pairs.map((p) => p.toJson()).toList(),
+    'feedback': feedback.toJson(),
+  };
 }
 
 /// Apskrita zona paveikslėlyje. `x` – pločio dalis, `y` – aukščio dalis (0–1),
@@ -318,11 +304,8 @@ class HotspotArea {
     return math.sqrt(dx * dx + dy * dy) <= r;
   }
 
-  factory HotspotArea.fromJson(Json json) => HotspotArea(
-        x: (json['x'] as num).toDouble(),
-        y: (json['y'] as num).toDouble(),
-        r: (json['r'] as num).toDouble(),
-      );
+  factory HotspotArea.fromJson(Json json) =>
+      HotspotArea(x: (json['x'] as num).toDouble(), y: (json['y'] as num).toDouble(), r: (json['r'] as num).toDouble());
 
   Json toJson() => {'x': x, 'y': y, 'r': r};
 }
@@ -353,38 +336,33 @@ class HotspotItem extends LessonItem {
   @override
   String get type => typeKey;
 
-  bool isCorrect(double x, double y) =>
-      targetAreas.any((a) => a.contains(x, y, aspectRatio: aspectRatio));
+  bool isCorrect(double x, double y) => targetAreas.any((a) => a.contains(x, y, aspectRatio: aspectRatio));
 
   factory HotspotItem.fromJson(Json json) => HotspotItem(
-        id: json['id'] as String,
-        prompt: json['prompt'] as String,
-        image: MediaImage.fromJson(json['image'] as Json),
-        targetAreas: parseList(json['targetAreas'], HotspotArea.fromJson),
-        aspectRatio: (json['aspectRatio'] as num?)?.toDouble() ?? 1,
-        feedback: ItemFeedback.fromJson(json['feedback']),
-        xp: json['xp'] as int? ?? 0,
-      );
+    id: json['id'] as String,
+    prompt: json['prompt'] as String,
+    image: MediaImage.fromJson(json['image'] as Json),
+    targetAreas: parseList(json['targetAreas'], HotspotArea.fromJson),
+    aspectRatio: (json['aspectRatio'] as num?)?.toDouble() ?? 1,
+    feedback: ItemFeedback.fromJson(json['feedback']),
+    xp: json['xp'] as int? ?? 0,
+  );
 
   @override
   Json toJson() => {
-        ..._baseJson(),
-        'prompt': prompt,
-        'image': image.toJson(),
-        'targetAreas': targetAreas.map((a) => a.toJson()).toList(),
-        'aspectRatio': aspectRatio,
-        'feedback': feedback.toJson(),
-      };
+    ..._baseJson(),
+    'prompt': prompt,
+    'image': image.toJson(),
+    'targetAreas': targetAreas.map((a) => a.toJson()).toList(),
+    'aspectRatio': aspectRatio,
+    'feedback': feedback.toJson(),
+  };
 }
 
 /// Šios programėlės versijai nežinomas tipas. Laikomas kaip yra, kad
 /// `toJson` grąžintų originalą, o pamokos ekranas jį praleistų.
 class UnsupportedItem extends LessonItem {
-  const UnsupportedItem({
-    required super.id,
-    required this.type,
-    required this.raw,
-  });
+  const UnsupportedItem({required super.id, required this.type, required this.raw});
 
   @override
   final String type;

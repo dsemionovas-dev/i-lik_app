@@ -29,13 +29,13 @@ void main() {
   final now = DateTime.utc(2026, 10, 18, 9);
 
   ReportService service({bool online = true}) => ReportService(
-        outbox: outbox,
-        remote: online ? remote : null,
-        ensureSignedIn: () async {
-          if (signInFails) throw const SocketException('nėra ryšio');
-        },
-        clock: () => now,
-      );
+    outbox: outbox,
+    remote: online ? remote : null,
+    ensureSignedIn: () async {
+      if (signInFails) throw const SocketException('nėra ryšio');
+    },
+    clock: () => now,
+  );
 
   Future<ReportDelivery> submit(ReportService s, [String message = '3 klausime teisingas 90°, ne 180°']) =>
       s.submit(category: ReportCategory.contentError, message: message, lessonId: 'nav-u02-l03', itemId: 'q2');
@@ -95,7 +95,8 @@ void main() {
         : const SocketException('nėra ryšio');
     await submit(service(), 'Šlamštas pranešimas 1');
     await submit(service(), 'Tikras pranešimas apie klaidą');
-    remote.failWith = (r) => r.message.startsWith('Šlamštas') ? const PostgrestException(message: 'x', code: 'P0429') : null;
+    remote.failWith = (r) =>
+        r.message.startsWith('Šlamštas') ? const PostgrestException(message: 'x', code: 'P0429') : null;
 
     expect(await service().flush(), 1);
     expect(remote.received.single.message, 'Tikras pranešimas apie klaidą');
@@ -123,14 +124,16 @@ void main() {
 
   test('Supabase: įrašoma į content_reports be user_id (jį nustato serveris)', () async {
     final requests = <http.Request>[];
-    final source = SupabaseReportRemoteDataSource(SupabaseClient(
-      'https://test.supabase.co',
-      'k',
-      httpClient: MockClient((r) async {
-        requests.add(r);
-        return http.Response('', 201, request: r);
-      }),
-    ));
+    final source = SupabaseReportRemoteDataSource(
+      SupabaseClient(
+        'https://test.supabase.co',
+        'k',
+        httpClient: MockClient((r) async {
+          requests.add(r);
+          return http.Response('', 201, request: r);
+        }),
+      ),
+    );
     final report = ContentReport(
       id: '0b6d9c1e-8a2f-4c3d-9e5f-1a2b3c4d5e6f',
       category: ReportCategory.unsafeAdvice,

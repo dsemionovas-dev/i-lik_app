@@ -26,7 +26,14 @@ final _catalog = ContentCatalog(
   courses: const [Course(id: 'navigation', title: 'Navigacija', order: 3)],
   units: const [CourseUnit(id: 'nav-u02', courseId: 'navigation', title: 'Kompasas', order: 2)],
   lessons: const [
-    LessonSummary(id: 'nav-u02-l03', courseId: 'navigation', unitId: 'nav-u02', title: 'Azimutas', order: 3, version: 4),
+    LessonSummary(
+      id: 'nav-u02-l03',
+      courseId: 'navigation',
+      unitId: 'nav-u02',
+      title: 'Azimutas',
+      order: 3,
+      version: 4,
+    ),
   ],
 );
 
@@ -40,14 +47,16 @@ void main() {
   late SharedPreferences prefs;
 
   Future<ProviderContainer> container() async {
-    final c = ProviderContainer(overrides: [
-      sharedPreferencesProvider.overrideWithValue(prefs),
-      authRepositoryProvider.overrideWithValue(auth),
-      progressStoreProvider.overrideWithValue(store),
-      catalogProvider.overrideWith((ref) async => _catalog),
-      badgeRemoteDataSourceProvider.overrideWithValue(remote),
-      clockProvider.overrideWithValue(() => now),
-    ]);
+    final c = ProviderContainer(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+        authRepositoryProvider.overrideWithValue(auth),
+        progressStoreProvider.overrideWithValue(store),
+        catalogProvider.overrideWith((ref) async => _catalog),
+        badgeRemoteDataSourceProvider.overrideWithValue(remote),
+        clockProvider.overrideWithValue(() => now),
+      ],
+    );
     addTearDown(c.dispose);
     c.listen(badgeControllerProvider, (_, _) {});
     await c.read(catalogProvider.future);
@@ -64,11 +73,13 @@ void main() {
     remote = _FakeBadgeRemote();
     auth = FakeAuthRepository(user: const AppUser(id: 'u1', isAnonymous: true));
     now = DateTime.utc(2026, 10, 18, 10);
-    await store.write(ProgressSnapshot(
-      ownerId: 'u1',
-      progress: {'nav-u02-l03': done('nav-u02-l03', accuracy: 1, xp: 30)},
-      activityDays: {'2026-10-18'},
-    ));
+    await store.write(
+      ProgressSnapshot(
+        ownerId: 'u1',
+        progress: {'nav-u02-l03': done('nav-u02-l03', accuracy: 1, xp: 30)},
+        activityDays: {'2026-10-18'},
+      ),
+    );
   });
 
   test('vietoje įvertinti ženkleliai gaunami su dabartiniu laiku', () async {

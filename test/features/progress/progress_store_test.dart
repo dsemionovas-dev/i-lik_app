@@ -22,15 +22,19 @@ void main() {
 
   test('įrašyta būsena perskaitoma su eile ir isSynced žyme', () async {
     final at = DateTime.utc(2026, 10, 18, 9, 30);
-    final progress = UserProgress.empty(userId: 'u1', lessonId: 'l1', lessonVersion: 4, at: at)
-        .withAttempt(accuracy: 0.8, xp: 20, at: at, lessonVersion: 4);
-    await store.write(ProgressSnapshot(
-      ownerId: 'u1',
-      progress: {'l1': progress},
-      outbox: [
-        LessonAttempt(id: 'a1', lessonId: 'l1', lessonVersion: 4, accuracy: 0.8, xp: 20, completedAt: at),
-      ],
-    ));
+    final progress = UserProgress.empty(
+      userId: 'u1',
+      lessonId: 'l1',
+      lessonVersion: 4,
+      at: at,
+    ).withAttempt(accuracy: 0.8, xp: 20, at: at, lessonVersion: 4);
+    await store.write(
+      ProgressSnapshot(
+        ownerId: 'u1',
+        progress: {'l1': progress},
+        outbox: [LessonAttempt(id: 'a1', lessonId: 'l1', lessonVersion: 4, accuracy: 0.8, xp: 20, completedAt: at)],
+      ),
+    );
 
     final read = (await store.read())!;
     expect(read.ownerId, 'u1');

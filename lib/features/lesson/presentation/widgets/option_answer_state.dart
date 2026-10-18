@@ -31,11 +31,7 @@ enum OptionAnswerState {
   }
 
   /// Bendra taisyklė bet kuriam variantui (taip pat „Teisinga“ / „Neteisinga“).
-  static OptionAnswerState resolve({
-    required bool selected,
-    required bool isCorrectOption,
-    required bool locked,
-  }) {
+  static OptionAnswerState resolve({required bool selected, required bool isCorrectOption, required bool locked}) {
     if (!locked) return selected ? OptionAnswerState.selected : OptionAnswerState.idle;
     if (isCorrectOption) {
       return selected ? OptionAnswerState.correct : OptionAnswerState.missedCorrect;
@@ -46,9 +42,9 @@ enum OptionAnswerState {
   bool get isSelected => this == selected || this == correct || this == wrong;
 
   String get semanticsHint => switch (this) {
-        correct => 'Teisingas atsakymas, pasirinkta',
-        missedCorrect => 'Teisingas atsakymas',
-        wrong => 'Neteisingas atsakymas',
-        _ => '',
-      };
+    correct => 'Teisingas atsakymas, pasirinkta',
+    missedCorrect => 'Teisingas atsakymas',
+    wrong => 'Neteisingas atsakymas',
+    _ => '',
+  };
 }

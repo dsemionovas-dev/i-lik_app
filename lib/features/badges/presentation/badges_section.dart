@@ -37,9 +37,7 @@ class BadgesSection extends ConsumerWidget {
             mainAxisSpacing: 8,
             crossAxisSpacing: 8,
             childAspectRatio: 0.72,
-            children: [
-              for (final d in state.definitions) _BadgeTile(definition: d, state: state),
-            ],
+            children: [for (final d in state.definitions) _BadgeTile(definition: d, state: state)],
           ),
         ],
       ),
@@ -102,8 +100,8 @@ class _BadgeTile extends StatelessWidget {
               earnedAt != null
                   ? 'Gautas ${formatDate(earnedAt)}'
                   : p.target > 0
-                      ? 'Progresas: ${p.current.clamp(0, p.target)} / ${p.target}'
-                      : 'Dar negautas',
+                  ? 'Progresas: ${p.current.clamp(0, p.target)} / ${p.target}'
+                  : 'Dar negautas',
               style: Theme.of(context).textTheme.labelLarge,
             ),
           ],
@@ -126,8 +124,10 @@ class NewBadgesNote extends ConsumerWidget {
     return Column(
       spacing: 8,
       children: [
-        Text(fresh.length == 1 ? 'Naujas ženklelis!' : 'Nauji ženkleliai!',
-            style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          fresh.length == 1 ? 'Naujas ženklelis!' : 'Nauji ženkleliai!',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         Wrap(
           alignment: WrapAlignment.center,
           spacing: 16,
@@ -137,7 +137,10 @@ class NewBadgesNote extends ConsumerWidget {
               Column(
                 key: ValueKey('new-badge-${b.id}'),
                 spacing: 4,
-                children: [BadgeMedal(icon: b.icon, earned: true), Text(b.title)],
+                children: [
+                  BadgeMedal(icon: b.icon, earned: true),
+                  Text(b.title),
+                ],
               ),
           ],
         ),

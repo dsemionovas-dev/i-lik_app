@@ -9,6 +9,4 @@ Future<void> initSupabase() async {
 }
 
 /// `null`, kai Supabase nesukonfigūruotas (vietinis režimas).
-final supabaseClientProvider = Provider<SupabaseClient?>(
-  (ref) => Env.hasSupabase ? Supabase.instance.client : null,
-);
+final supabaseClientProvider = Provider<SupabaseClient?>((ref) => Env.hasSupabase ? Supabase.instance.client : null);

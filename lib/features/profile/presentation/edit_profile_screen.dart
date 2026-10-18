@@ -89,7 +89,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                           onTap: () => setState(() => _avatar = key),
                           child: CircleAvatar(
                             radius: 28,
-                            backgroundColor: key == _avatar ? theme.colorScheme.primaryContainer : theme.colorScheme.surfaceContainerHighest,
+                            backgroundColor: key == _avatar
+                                ? theme.colorScheme.primaryContainer
+                                : theme.colorScheme.surfaceContainerHighest,
                             child: Text(a.emoji, style: const TextStyle(fontSize: 28)),
                           ),
                         ),
@@ -100,7 +102,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 if (_error != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12),
-                    child: Text(_error!, key: const ValueKey('profile-error'), style: TextStyle(color: theme.colorScheme.error)),
+                    child: Text(
+                      _error!,
+                      key: const ValueKey('profile-error'),
+                      style: TextStyle(color: theme.colorScheme.error),
+                    ),
                   ),
                 FilledButton(onPressed: _saving ? null : _save, child: const Text('Išsaugoti')),
               ],

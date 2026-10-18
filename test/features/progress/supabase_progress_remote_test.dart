@@ -12,21 +12,23 @@ void main() {
   late List<http.Request> requests;
   late http.Response Function(http.Request) respond;
 
-  SupabaseProgressRemoteDataSource source() => SupabaseProgressRemoteDataSource(SupabaseClient(
-        'https://test.supabase.co',
-        'publishable-key',
-        httpClient: MockClient((request) async {
-          requests.add(request);
-          return respond(request);
-        }),
-      ));
+  SupabaseProgressRemoteDataSource source() => SupabaseProgressRemoteDataSource(
+    SupabaseClient(
+      'https://test.supabase.co',
+      'publishable-key',
+      httpClient: MockClient((request) async {
+        requests.add(request);
+        return respond(request);
+      }),
+    ),
+  );
 
   http.Response json(http.Request request, Object body, [int status = 200]) => http.Response(
-        jsonEncode(body),
-        status,
-        headers: {'content-type': 'application/json; charset=utf-8'},
-        request: request,
-      );
+    jsonEncode(body),
+    status,
+    headers: {'content-type': 'application/json; charset=utf-8'},
+    request: request,
+  );
 
   setUp(() => requests = []);
 
@@ -58,20 +60,24 @@ void main() {
 
   test('serverio atmetimo kodas perduodamas (pagal jį servisas sprendžia, ar kartoti)', () async {
     respond = (r) => json(r, {'code': '22023', 'message': 'xp out of range: 9999'}, 400);
-    expect(
-      source().recordAttempt(attempt),
-      throwsA(isA<PostgrestException>().having((e) => e.code, 'code', '22023')),
-    );
+    expect(source().recordAttempt(attempt), throwsA(isA<PostgrestException>().having((e) => e.code, 'code', '22023')));
   });
 
   test('progresas: snake_case eilutės → UserProgress', () async {
     respond = (r) => json(r, [
-          {
-            'user_id': 'u1', 'lesson_id': 'nav-u02-l03', 'lesson_version': 4, 'status': 'completed',
-            'stars': 2, 'best_accuracy': 0.857, 'xp_earned': 47, 'attempts': 2,
-            'completed_at': '2026-10-18T09:30:00+00:00', 'updated_at': '2026-10-18T10:00:00+00:00',
-          },
-        ]);
+      {
+        'user_id': 'u1',
+        'lesson_id': 'nav-u02-l03',
+        'lesson_version': 4,
+        'status': 'completed',
+        'stars': 2,
+        'best_accuracy': 0.857,
+        'xp_earned': 47,
+        'attempts': 2,
+        'completed_at': '2026-10-18T09:30:00+00:00',
+        'updated_at': '2026-10-18T10:00:00+00:00',
+      },
+    ]);
     final rows = await source().fetchProgress();
 
     expect(requests.single.url.path, '/rest/v1/user_lesson_progress');

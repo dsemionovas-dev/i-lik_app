@@ -73,7 +73,8 @@ class SupabaseAuthRepository implements AuthRepository {
           email: user.email,
           isAnonymous: user.isAnonymous,
           pendingEmail: user.newEmail,
-          needsPassword: !user.isAnonymous &&
+          needsPassword:
+              !user.isAnonymous &&
               user.email != null &&
               user.emailConfirmedAt != null &&
               user.userMetadata?[passwordSetFlag] != true,
@@ -89,13 +90,10 @@ class SupabaseAuthRepository implements AuthRepository {
       onListen: () {
         var last = currentUser;
         controller.add(last);
-        subscription = _auth.onAuthStateChange.listen(
-          (state) {
-            final user = _map(state.session?.user);
-            if (user != last) controller.add(last = user);
-          },
-          onError: controller.addError,
-        );
+        subscription = _auth.onAuthStateChange.listen((state) {
+          final user = _map(state.session?.user);
+          if (user != last) controller.add(last = user);
+        }, onError: controller.addError);
       },
       onCancel: () => unawaited(subscription?.cancel()),
     );
@@ -191,18 +189,18 @@ class SupabaseAuthRepository implements AuthRepository {
 
 /// Supabase Auth klaidų kodai → lietuviški pranešimai.
 String describeAuthError(AuthException e) => switch (e.code) {
-      'invalid_credentials' => 'Neteisingas el. paštas arba slaptažodis.',
-      'email_not_confirmed' => 'Pirmiausia patvirtinkite el. paštą – nuoroda išsiųsta laišku.',
-      'user_already_exists' || 'email_exists' => 'Paskyra su šiuo el. paštu jau yra. Prisijunkite.',
-      'weak_password' => 'Slaptažodis per silpnas – naudokite bent 8 simbolius su raidėmis ir skaičiais.',
-      'same_password' => 'Naujas slaptažodis turi skirtis nuo dabartinio.',
-      'reauthentication_needed' => 'Dėl saugumo prisijunkite iš naujo ir pakartokite.',
-      'otp_expired' => 'Kodas neteisingas arba nebegalioja. Paprašykite naujo.',
-      'validation_failed' || 'email_address_invalid' => 'Neteisingas el. pašto adresas.',
-      'over_request_rate_limit' || 'over_email_send_rate_limit' => 'Per daug bandymų. Palaukite kelias minutes.',
-      'anonymous_provider_disabled' => 'Svečio režimas serveryje išjungtas.',
-      _ => 'Nepavyko: ${e.message}',
-    };
+  'invalid_credentials' => 'Neteisingas el. paštas arba slaptažodis.',
+  'email_not_confirmed' => 'Pirmiausia patvirtinkite el. paštą – nuoroda išsiųsta laišku.',
+  'user_already_exists' || 'email_exists' => 'Paskyra su šiuo el. paštu jau yra. Prisijunkite.',
+  'weak_password' => 'Slaptažodis per silpnas – naudokite bent 8 simbolius su raidėmis ir skaičiais.',
+  'same_password' => 'Naujas slaptažodis turi skirtis nuo dabartinio.',
+  'reauthentication_needed' => 'Dėl saugumo prisijunkite iš naujo ir pakartokite.',
+  'otp_expired' => 'Kodas neteisingas arba nebegalioja. Paprašykite naujo.',
+  'validation_failed' || 'email_address_invalid' => 'Neteisingas el. pašto adresas.',
+  'over_request_rate_limit' || 'over_email_send_rate_limit' => 'Per daug bandymų. Palaukite kelias minutes.',
+  'anonymous_provider_disabled' => 'Svečio režimas serveryje išjungtas.',
+  _ => 'Nepavyko: ${e.message}',
+};
 
 /// Be Supabase: svečias su vietiniu ID (kūrimui ir demonstracijai).
 class LocalGuestAuthRepository implements AuthRepository {
@@ -278,9 +276,7 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
       : SupabaseAuthRepository(client.auth);
 });
 
-final authStateProvider = StreamProvider<AppUser?>(
-  (ref) => ref.watch(authRepositoryProvider).authStateChanges(),
-);
+final authStateProvider = StreamProvider<AppUser?>((ref) => ref.watch(authRepositoryProvider).authStateChanges());
 
 /// Atidaryta slaptažodžio atstatymo nuoroda – app'as nukreipia į naujo slaptažodžio ekraną.
 /// Skaitiklis, kad kiekvienas įvykis būtų nauja reikšmė (klausytojai jį pastebi).
