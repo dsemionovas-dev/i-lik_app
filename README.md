@@ -112,6 +112,15 @@ ContentRepository ── 1. Supabase (SupabaseLessonRemoteDataSource)
 
 - **Slaptažodis**: susietas svečias, patvirtinęs el. paštą (naršyklėje – grįžus į programėlę vartotojas atnaujinamas), profilyje raginamas nusistatyti slaptažodį (≥ 8 simboliai, raidės ir skaičiai). Supabase neatskleidžia, ar slaptažodis yra, todėl tai žymima `user_metadata.password_set` (tik UI žyma).
 
+- **Pamiršau slaptažodį**: prisijungimo lange → `/reset-password`. Supabase `resetPasswordForEmail` išsiunčia laišką; vartotojas įveda **6 skaitmenų kodą** (`verifyOTP`, `recovery`) ir naują slaptažodį – veikia ir be giliųjų nuorodų. Paspaudus laiško nuorodą `lt.islik://auth-callback` (užregistruota Android / iOS), programėlė gauna `passwordRecovery` įvykį ir atidaro naujo slaptažodžio ekraną.
+
+## Gidas
+
+- 10 atmintinių (krizės, pirmoji pagalba, gamtoje) `assets/guide/guide.json` – veikia nuo pirmo paleidimo, be interneto ir be paskyros (pasiekiama ir iš onboardingo).
+- Visada atidaromas iš įrenginio: kešas (jei naujesnis) arba įdiegtas. Naujesnė versija iš Supabase `guide_books` atsisiunčiama fone ir išsaugoma.
+- Paieška be lietuviškų raidžių („siaure“ → „šiaurė“), kategorijos, mygtukas „Skambinti 112“, kuprinės kontrolinis sąrašas (žymės saugomos įrenginyje).
+- **Turinį prieš išleidžiant turi patvirtinti ekspertas** (PRD) – ypač pirmąją pagalbą ir civilinės saugos informaciją bei šaltinių nuorodas.
+
 ## Lygos
 
 - 10 lygų (Pradinukas → Rangeris), grupės iki 30, savaitė – pirmadienis 00:00 Europe/Vilnius. Top 7 kyla, paskutiniai 5 krenta (1 lygoje nekrentama, 10-oje nekylama; mažoje grupėje kilimo zona turi pirmenybę).
@@ -124,6 +133,8 @@ ContentRepository ── 1. Supabase (SupabaseLessonRemoteDataSource)
 
 - Authentication → Sign In / Providers: įjungti **Anonymous sign-ins** ir **Email**.
 - Rekomenduojama įjungti CAPTCHA anoniminiams prisijungimams (apsauga nuo masinio paskyrų kūrimo).
+- Authentication → URL Configuration → Redirect URLs: pridėti `lt.islik://auth-callback`.
+- Authentication → Email Templates → Reset Password: į laišką įtraukti kodą `{{ .Token }}` (programėlė prašo 6 skaitmenų kodo).
 - Authentication → Providers → Email: įjungti **Secure email change** ir pasirinkti slaptažodžio reikalavimus (raidės + skaičiai, ≥ 8).
 - Migracija `…_progress.sql` sukuria `user_lesson_progress`, `lesson_attempts` ir funkciją `record_lesson_attempt` (RLS: tik savo duomenys, rašyti – tik per funkciją).
 

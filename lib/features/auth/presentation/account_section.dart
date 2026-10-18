@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../app/router/routes.dart';
 
 import '../../progress/application/progress_controller.dart';
 import '../application/auth_controller.dart';
@@ -126,10 +129,11 @@ class AccountSection extends ConsumerWidget {
   Future<void> _signIn(BuildContext context, WidgetRef ref) async {
     final input = await showDialog<_Credentials>(
       context: context,
-      builder: (_) => const _CredentialsDialog(
+      builder: (_) => _CredentialsDialog(
         title: 'Prisijungti',
         askPassword: true,
         warning: 'Svečio progresas į esamą paskyrą neperkeliamas.',
+        onForgotPassword: (email) => context.push(Routes.resetPassword(email: email.trim())),
       ),
     );
     if (input == null) return;
@@ -161,11 +165,14 @@ class AccountSection extends ConsumerWidget {
 typedef _Credentials = ({String email, String password});
 
 class _CredentialsDialog extends StatefulWidget {
-  const _CredentialsDialog({required this.title, required this.askPassword, this.warning});
+  const _CredentialsDialog({required this.title, required this.askPassword, this.warning, this.onForgotPassword});
 
   final String title;
   final bool askPassword;
   final String? warning;
+
+  /// Uždaro langą ir atidaro atstatymą (su jau įvestu el. paštu).
+  final ValueChanged<String>? onForgotPassword;
 
   @override
   State<_CredentialsDialog> createState() => _CredentialsDialogState();
@@ -205,6 +212,18 @@ class _CredentialsDialogState extends State<_CredentialsDialog> {
               obscureText: true,
               autofillHints: const [AutofillHints.password],
               decoration: const InputDecoration(labelText: 'Slaptažodis'),
+            ),
+          if (widget.onForgotPassword != null)
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () {
+                  final email = _email.text;
+                  Navigator.pop(context);
+                  widget.onForgotPassword!(email);
+                },
+                child: const Text('Pamiršau slaptažodį?'),
+              ),
             ),
         ],
       ),

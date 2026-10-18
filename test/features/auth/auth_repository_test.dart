@@ -183,6 +183,42 @@ void main() {
       );
     });
 
+    test('slaptažodžio atstatymas: laiškas su kodu ir grąžinimo nuoroda', () async {
+      respond = (r) => json(r, <String, Object>{});
+      await repo.sendPasswordReset(' jonas@pastas.lt ');
+
+      final r = requests.single;
+      expect(r.url.path, '/auth/v1/recover');
+      expect(r.url.queryParameters['redirect_to'], 'lt.islik://auth-callback');
+      expect((jsonDecode(r.body) as Map<String, dynamic>)['email'], 'jonas@pastas.lt');
+    });
+
+    test('atstatymo kodas: verify (recovery) prisijungia, tada slaptažodis', () async {
+      respond = (r) => json(r, _session(anonymous: false, email: 'jonas@pastas.lt', confirmed: true));
+      final user = await repo.verifyPasswordResetCode('jonas@pastas.lt', ' 123456 ');
+
+      final verify = requests.single;
+      expect(verify.url.path, '/auth/v1/verify');
+      final body = jsonDecode(verify.body) as Map<String, dynamic>;
+      expect((body['type'], body['token'], body['email']), ('recovery', '123456', 'jonas@pastas.lt'));
+      expect(user.email, 'jonas@pastas.lt');
+
+      respond = (r) => json(r, {
+            ...(_session(anonymous: false, email: 'jonas@pastas.lt', confirmed: true)['user']! as Map<String, Object?>),
+            'user_metadata': {'password_set': true},
+          });
+      await repo.setPassword('Kompasas42');
+      expect(requests.last.method, 'PUT');
+    });
+
+    test('neteisingas ar pasibaigęs kodas – aiškus pranešimas', () async {
+      respond = (r) => json(r, {'code': 'otp_expired', 'msg': 'Token has expired or is invalid'}, 403);
+      expect(
+        repo.verifyPasswordResetCode('jonas@pastas.lt', '000000'),
+        throwsA(isA<AuthFailure>().having((e) => e.message, 'message', 'Kodas neteisingas arba nebegalioja. Paprašykite naujo.')),
+      );
+    });
+
     test('refreshUser atnaujina vartotoją (el. paštas patvirtintas naršyklėje)', () async {
       respond = (r) => json(r, _session(anonymous: true));
       await repo.ensureSignedIn();

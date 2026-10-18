@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/auth/presentation/reset_password_screen.dart';
 import '../../features/guide/presentation/guide_card_screen.dart';
 import '../../features/guide/presentation/guide_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
@@ -34,7 +35,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final onboarded = refresh.value;
       final atOnboarding = state.matchedLocation == Routes.onboarding;
-      if (!onboarded && !atOnboarding) return Routes.onboarding;
+      if (!onboarded && !atOnboarding && !Routes.isPublic(state.matchedLocation)) return Routes.onboarding;
       if (onboarded && atOnboarding) return Routes.home;
       return null;
     },
@@ -90,6 +91,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
           ]),
         ],
+      ),
+
+      GoRoute(
+        path: Routes.resetPasswordPath,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => ResetPasswordScreen(
+          initialEmail: state.uri.queryParameters['email'],
+          newPasswordOnly: state.uri.queryParameters['step'] == 'new',
+        ),
       ),
 
       // Pamoka – viso ekrano modalas virš skirtukų juostos (root navigator).

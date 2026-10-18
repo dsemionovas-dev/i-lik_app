@@ -40,6 +40,32 @@ class AuthController extends AsyncNotifier<String?> {
         return 'Slaptažodis nustatytas – dabar galite prisijungti bet kuriame įrenginyje.';
       });
 
+  /// 1 žingsnis: atstatymo laiškas. Pranešimas sąmoningai neatskleidžia, ar paskyra yra.
+  Future<bool> requestPasswordReset(String email) =>
+      _run(() async {
+        _validateEmail(email);
+        await _repo.sendPasswordReset(email);
+        return 'Jei paskyra su šiuo el. paštu yra, išsiuntėme laišką su 6 skaitmenų kodu.';
+      });
+
+  /// 2 žingsnis: kodas iš laiško + naujas slaptažodis.
+  Future<bool> resetPassword({
+    required String email,
+    required String code,
+    required String password,
+    required String confirmation,
+  }) =>
+      _run(() async {
+        if (!RegExp(r'^\d{6}$').hasMatch(code.trim())) {
+          throw const AuthFailure('Įveskite 6 skaitmenų kodą iš laiško.');
+        }
+        // Slaptažodį tikrinam prieš kodą – kad neišnaudotume vienkartinio kodo veltui.
+        validateNewPassword(password, confirmation);
+        await _repo.verifyPasswordResetCode(email, code);
+        await _repo.setPassword(password);
+        return 'Slaptažodis pakeistas – esate prisijungę.';
+      });
+
   /// Naujo slaptažodžio taisyklės (Supabase pusėje rekomenduojama tokias pat įjungti).
   static void validateNewPassword(String password, String confirmation) {
     if (password.length < 8) throw const AuthFailure('Slaptažodis turi būti bent 8 simbolių.');

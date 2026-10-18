@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../features/auth/data/auth_repository.dart';
 import '../features/progress/application/progress_controller.dart';
 import 'router/app_router.dart';
+import 'router/routes.dart';
 import 'theme/app_theme.dart';
 
 class IslikApp extends ConsumerStatefulWidget {
@@ -43,6 +44,10 @@ class _IslikAppState extends ConsumerState<IslikApp> {
     // Progresas įkeliamas ir sinchronizuojamas paleidus programėlę.
     ref.listen(progressControllerProvider, (_, _) {});
     final router = ref.watch(appRouterProvider);
+    // Atidaryta slaptažodžio atstatymo nuoroda iš laiško.
+    ref.listen(passwordRecoveryProvider, (_, next) {
+      if (next.hasValue) router.go(Routes.newPassword);
+    });
     return MaterialApp.router(
       title: 'Išlik',
       debugShowCheckedModeBanner: false,

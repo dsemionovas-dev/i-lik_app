@@ -9,6 +9,7 @@ import 'package:islik/app/app.dart';
 import 'package:islik/core/storage/shared_preferences_provider.dart';
 import 'package:islik/features/auth/data/auth_repository.dart';
 import 'package:islik/features/auth/domain/app_user.dart';
+import 'package:islik/features/guide/application/guide_providers.dart';
 import 'package:islik/features/leagues/data/league_repository.dart';
 import 'package:islik/features/lesson/data/lesson_repository.dart';
 import 'package:islik/features/progress/application/progress_controller.dart';
@@ -26,6 +27,7 @@ Future<void> pumpApp(WidgetTester tester, {bool onboarded = false, List<Override
       sharedPreferencesProvider.overrideWithValue(prefs),
       lessonCacheProvider.overrideWithValue(InMemoryLessonCache()),
       progressStoreProvider.overrideWithValue(InMemoryProgressStore()),
+      guideCacheProvider.overrideWithValue(InMemoryGuideCache()),
       ...overrides,
     ],
     child: const IslikApp(),
@@ -112,6 +114,21 @@ void main() {
     expect(find.text('Kita pamoka: Kompaso azimutas'), findsOneWidget);
   });
 
+  testWidgets('gidas pasiekiamas be registracijos, kiti skirtukai – tik po onboardingo', (tester) async {
+    await pumpApp(tester);
+    await tester.tap(find.text('Atidaryti gidą be registracijos'));
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(AppBar, 'Gidas'), findsOneWidget);
+
+    await tester.tap(find.text('Sirenos ir įspėjimai'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Dėmesio visiems'), findsOneWidget);
+
+    await tester.tap(find.text('Pradžia'));
+    await tester.pumpAndSettle();
+    expect(find.text('Sveiki atvykę į Išlik'), findsOneWidget);
+  });
+
   testWidgets('skirtukai ir įdėti maršrutai', (tester) async {
     await pumpApp(tester, onboarded: true);
 
@@ -119,7 +136,8 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('72 val. kuprinė'));
     await tester.pumpAndSettle();
-    expect(find.text('Atmintinė: kuprine-72h'), findsOneWidget);
+    expect(find.widgetWithText(AppBar, '72 val. kuprinė'), findsOneWidget);
+    expect(find.text('Turite: 0 iš 12'), findsOneWidget);
     expect(find.byType(NavigationBar), findsOneWidget);
 
     await tester.tap(find.text('Profilis'));
@@ -391,6 +409,66 @@ void main() {
       expect(auth.calls, contains('refreshUser'));
       expect(find.textContaining('Laukiama patvirtinimo'), findsNothing);
       expect(find.text('Nustatyti slaptažodį'), findsOneWidget);
+    });
+
+    testWidgets('pamiršus slaptažodį – kodas iš laiško ir naujas slaptažodis', (tester) async {
+      await pumpApp(tester, onboarded: true, overrides: online());
+      await tester.tap(find.text('Profilis'));
+      await tester.pumpAndSettle();
+      await tapVisible(tester, find.text('Jau turiu paskyrą'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const ValueKey('email-field')), 'jonas@pastas.lt');
+      await tester.tap(find.text('Pamiršau slaptažodį?'));
+      await tester.pumpAndSettle();
+
+      // El. paštas perkeltas iš prisijungimo lango.
+      expect(find.widgetWithText(AppBar, 'Slaptažodžio atstatymas'), findsOneWidget);
+      expect(find.widgetWithText(TextField, 'jonas@pastas.lt'), findsOneWidget);
+      await tester.tap(find.text('Siųsti kodą'));
+      await tester.pumpAndSettle();
+      expect(auth.calls, contains('reset:jonas@pastas.lt'));
+
+      Future<void> submit(String code) async {
+        await tester.enterText(find.byKey(const ValueKey('reset-code-field')), code);
+        await tester.enterText(find.byKey(const ValueKey('reset-password-field')), 'Kompasas42');
+        await tester.enterText(find.byKey(const ValueKey('reset-confirm-field')), 'Kompasas42');
+        await tapVisible(tester, find.text('Keisti slaptažodį'));
+        await tester.pumpAndSettle();
+      }
+
+      await submit('000000');
+      expect(find.text('Kodas neteisingas arba nebegalioja. Paprašykite naujo.'), findsOneWidget);
+      expect(auth.currentUser!.isAnonymous, isTrue);
+
+      await submit('123456');
+      expect(find.text('Slaptažodis pakeistas – esate prisijungę.'), findsOneWidget);
+      expect(auth.calls, containsAllInOrder(['verify:123456', 'setPassword']));
+
+      await tester.tap(find.text('Grįžti'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('account-email')), findsOneWidget);
+      expect(find.text('jonas@pastas.lt'), findsOneWidget);
+    });
+
+    testWidgets('atidarius atstatymo nuorodą iš laiško – naujo slaptažodžio ekranas', (tester) async {
+      auth.setUser(const AppUser(id: 'user-1', email: 'jonas@pastas.lt'));
+      await pumpApp(tester, onboarded: true, overrides: online());
+
+      auth.emitPasswordRecovery();
+      await tester.pumpAndSettle();
+      expect(find.text('Sukurkite naują slaptažodį.'), findsOneWidget);
+      expect(find.byKey(const ValueKey('reset-code-field')), findsNothing);
+
+      await tester.enterText(find.byKey(const ValueKey('reset-password-field')), 'Kompasas42');
+      await tester.enterText(find.byKey(const ValueKey('reset-confirm-field')), 'Kompasas42');
+      await tester.tap(find.text('Išsaugoti'));
+      await tester.pumpAndSettle();
+      expect(auth.calls, contains('setPassword'));
+      expect(find.text('Slaptažodis pakeistas – esate prisijungę.'), findsOneWidget);
+
+      await tester.tap(find.text('Grįžti'));
+      await tester.pumpAndSettle();
+      expect(find.byType(NavigationBar), findsOneWidget);
     });
 
     testWidgets('profilyje – lygos kortelė, paspaudus – lentelė', (tester) async {

@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../core/config/env.dart';
 import '../../../core/storage/shared_preferences_provider.dart';
 import '../../../core/supabase/supabase_providers.dart';
 import '../domain/app_user.dart';
@@ -36,6 +37,17 @@ abstract interface class AuthRepository {
 
   /// Atnaujina vartotojo duomenis iš serverio (pvz., el. paštas patvirtintas naršyklėje).
   Future<void> refreshUser();
+
+  /// Išsiunčia slaptažodžio atstatymo laišką (su kodu ir nuoroda). Neatskleidžia,
+  /// ar paskyra su tokiu el. paštu yra.
+  Future<void> sendPasswordReset(String email);
+
+  /// Patikrina laiške gautą kodą ir prisijungia – po to galima [setPassword].
+  Future<AppUser> verifyPasswordResetCode(String email, String code);
+
+  /// Vartotojas atidarė atstatymo nuorodą iš laiško (gilioji nuoroda) – jau prisijungęs,
+  /// reikia tik naujo slaptažodžio.
+  Stream<void> passwordRecoveryEvents();
 
   Future<void> signOut();
 }
@@ -146,6 +158,22 @@ class SupabaseAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<void> sendPasswordReset(String email) =>
+      _guard(() => _auth.resetPasswordForEmail(email.trim(), redirectTo: Env.authRedirectUrl));
+
+  @override
+  Future<AppUser> verifyPasswordResetCode(String email, String code) async {
+    final response = await _guard(
+      () => _auth.verifyOTP(email: email.trim(), token: code.trim(), type: OtpType.recovery),
+    );
+    return _map(response.user)!;
+  }
+
+  @override
+  Stream<void> passwordRecoveryEvents() =>
+      _auth.onAuthStateChange.where((s) => s.event == AuthChangeEvent.passwordRecovery).map((_) {});
+
+  @override
   Future<void> signOut() => _guard(_auth.signOut);
 
   static Future<T> _guard<T>(Future<T> Function() action) async {
@@ -169,6 +197,7 @@ String describeAuthError(AuthException e) => switch (e.code) {
       'weak_password' => 'Slaptažodis per silpnas – naudokite bent 8 simbolius su raidėmis ir skaičiais.',
       'same_password' => 'Naujas slaptažodis turi skirtis nuo dabartinio.',
       'reauthentication_needed' => 'Dėl saugumo prisijunkite iš naujo ir pakartokite.',
+      'otp_expired' => 'Kodas neteisingas arba nebegalioja. Paprašykite naujo.',
       'validation_failed' || 'email_address_invalid' => 'Neteisingas el. pašto adresas.',
       'over_request_rate_limit' || 'over_email_send_rate_limit' => 'Per daug bandymų. Palaukite kelias minutes.',
       'anonymous_provider_disabled' => 'Svečio režimas serveryje išjungtas.',
@@ -227,6 +256,15 @@ class LocalGuestAuthRepository implements AuthRepository {
   Future<void> refreshUser() async {}
 
   @override
+  Future<void> sendPasswordReset(String email) async => throw _unavailable;
+
+  @override
+  Future<AppUser> verifyPasswordResetCode(String email, String code) async => throw _unavailable;
+
+  @override
+  Stream<void> passwordRecoveryEvents() => const Stream.empty();
+
+  @override
   Future<void> signOut() async {
     await _prefs.remove(_key);
     _changes.add(null);
@@ -243,3 +281,10 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
 final authStateProvider = StreamProvider<AppUser?>(
   (ref) => ref.watch(authRepositoryProvider).authStateChanges(),
 );
+
+/// Atidaryta slaptažodžio atstatymo nuoroda – app'as nukreipia į naujo slaptažodžio ekraną.
+/// Skaitiklis, kad kiekvienas įvykis būtų nauja reikšmė (klausytojai jį pastebi).
+final passwordRecoveryProvider = StreamProvider<int>((ref) {
+  var count = 0;
+  return ref.watch(authRepositoryProvider).passwordRecoveryEvents().map((_) => ++count);
+});

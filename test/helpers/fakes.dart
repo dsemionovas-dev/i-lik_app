@@ -9,6 +9,7 @@ import 'package:islik/features/auth/data/auth_repository.dart';
 import 'package:islik/features/auth/domain/app_user.dart';
 import 'package:islik/features/lesson/data/lesson_cache.dart';
 import 'package:islik/features/lesson/data/lesson_remote_data_source.dart';
+import 'package:islik/features/guide/data/guide_repository.dart';
 import 'package:islik/features/leagues/data/league_repository.dart';
 import 'package:islik/features/leagues/domain/league.dart';
 import 'package:islik/features/lesson/domain/models/catalog.dart';
@@ -204,6 +205,25 @@ class FakeAuthRepository implements AuthRepository {
         if (afterRefresh != null) setUser(afterRefresh);
       });
 
+  /// Teisingas atstatymo kodas.
+  String resetCode = '123456';
+  final _recoveries = StreamController<void>.broadcast();
+
+  void emitPasswordRecovery() => _recoveries.add(null);
+
+  @override
+  Future<void> sendPasswordReset(String email) => _call('reset:$email', () {});
+
+  @override
+  Future<AppUser> verifyPasswordResetCode(String email, String code) => _call('verify:$code', () {
+        if (code != resetCode) throw const AuthFailure('Kodas neteisingas arba nebegalioja. Paprašykite naujo.');
+        setUser(AppUser(id: 'user-$email', email: email));
+        return _user!;
+      });
+
+  @override
+  Stream<void> passwordRecoveryEvents() => _recoveries.stream;
+
   @override
   Future<void> signOut() => _call('signOut', () => setUser(null));
 }
@@ -246,3 +266,32 @@ LeagueStanding leagueOf(
           LeagueMember(rank: i + 1, displayName: 'Žygeivis ${i + 1}', weeklyXp: x, isMe: meAt == i + 1),
       ],
     );
+
+class InMemoryGuideCache implements GuideCache {
+  Json? saved;
+  var failWrites = false;
+
+  @override
+  Future<Json?> read() async => saved;
+
+  @override
+  Future<void> write(Json guide) async {
+    if (failWrites) throw StateError('diskas pilnas');
+    saved = guide;
+  }
+}
+
+class FakeGuideRemote implements GuideRemoteDataSource {
+  FakeGuideRemote([this.guide]);
+
+  Json? guide;
+  Object? error;
+  var calls = 0;
+
+  @override
+  Future<Json?> fetchGuide(String locale) async {
+    calls++;
+    if (error != null) throw error!;
+    return guide;
+  }
+}

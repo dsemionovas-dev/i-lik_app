@@ -81,4 +81,45 @@ void main() {
       expect(state().value, contains('Slaptažodis nustatytas'));
     });
   });
+
+  group('slaptažodžio atstatymas', () {
+    test('laiško prašymas: neatskleidžia, ar paskyra yra', () async {
+      expect(await controller().requestPasswordReset('jonas@pastas.lt'), isTrue);
+      expect(state().value, 'Jei paskyra su šiuo el. paštu yra, išsiuntėme laišką su 6 skaitmenų kodu.');
+      expect(repo.calls, ['reset:jonas@pastas.lt']);
+
+      expect(await controller().requestPasswordReset('ne-pastas'), isFalse);
+      expect(repo.calls, hasLength(1));
+    });
+
+    test('blogas kodo formatas ar slaptažodis – kodas neišnaudojamas', () async {
+      Future<bool> reset(String code, String pass, String confirm) => controller()
+          .resetPassword(email: 'jonas@pastas.lt', code: code, password: pass, confirmation: confirm);
+
+      expect(await reset('12a456', 'Kompasas42', 'Kompasas42'), isFalse);
+      expect(state().error.toString(), 'Įveskite 6 skaitmenų kodą iš laiško.');
+      expect(await reset('123456', 'trumpas', 'trumpas'), isFalse);
+      expect(state().error.toString(), 'Slaptažodis turi būti bent 8 simbolių.');
+      expect(repo.calls, isEmpty);
+    });
+
+    test('neteisingas kodas – klaida, slaptažodis nekeičiamas', () async {
+      expect(
+        await controller().resetPassword(email: 'jonas@pastas.lt', code: '000000', password: 'Kompasas42', confirmation: 'Kompasas42'),
+        isFalse,
+      );
+      expect(state().error.toString(), contains('Kodas neteisingas'));
+      expect(repo.calls, ['verify:000000']);
+    });
+
+    test('teisingas kodas – prisijungiama ir nustatomas slaptažodis', () async {
+      expect(
+        await controller().resetPassword(email: 'jonas@pastas.lt', code: '123456', password: 'Kompasas42', confirmation: 'Kompasas42'),
+        isTrue,
+      );
+      expect(repo.calls, ['verify:123456', 'setPassword']);
+      expect(repo.currentUser!.email, 'jonas@pastas.lt');
+      expect(state().value, 'Slaptažodis pakeistas – esate prisijungę.');
+    });
+  });
 }

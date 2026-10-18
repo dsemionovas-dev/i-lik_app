@@ -1,0 +1,225 @@
+{
+  "locale": "lt-LT",
+  "version": 1,
+  "categories": [
+    { "id": "crisis", "title": "Krizės ir pavojai", "icon": "warning" },
+    { "id": "first-aid", "title": "Pirmoji pagalba", "icon": "medical" },
+    { "id": "wild", "title": "Gamtoje", "icon": "forest" }
+  ],
+  "cards": [
+    {
+      "id": "skubi-pagalba-112",
+      "categoryId": "crisis",
+      "title": "Skubi pagalba – 112",
+      "summary": "Bendrasis pagalbos numeris visoje ES. Skambutis nemokamas, skambinti galima ir iš užrakinto telefono.",
+      "keywords": ["skambinti", "greitoji", "policija", "gaisrinė", "pagalba"],
+      "emergencyCall": true,
+      "blocks": [
+        { "kind": "steps", "heading": "Ką pasakyti operatoriui", "items": [
+          "Kas atsitiko.",
+          "Kur esate: adresas arba aiškūs orientyrai. Gamtoje – koordinatės iš telefono žemėlapio.",
+          "Kiek yra nukentėjusių ir ar jie sąmoningi, ar kvėpuoja.",
+          "Atsakykite į klausimus ir nebaikite pokalbio, kol operatorius nepasakys."
+        ] },
+        { "kind": "warning", "text": "Neskambinkite 112 tik pasiteirauti informacijos – linija turi likti laisva tiems, kam reikia skubios pagalbos." }
+      ],
+      "sources": [
+        { "title": "Bendrasis pagalbos centras", "url": "https://bpc.lt" }
+      ]
+    },
+    {
+      "id": "kuprine-72h",
+      "categoryId": "crisis",
+      "title": "72 val. kuprinė",
+      "summary": "Daiktai, kurių reikia 3 paroms be elektros, vandentiekio ar parduotuvių. Pasižymėkite, ką jau turite.",
+      "keywords": ["lagaminas", "evakuacija", "pasiruošimas", "atsargos", "kuprine"],
+      "blocks": [
+        { "kind": "checklist", "heading": "Kuprinėje", "items": [
+          "Geriamas vanduo – apie 3 litrai žmogui per parą",
+          "Ilgai negendantis maistas 3 paroms",
+          "Žibintuvėlis ir atsarginės baterijos",
+          "Radijo imtuvas su baterijomis arba rankiniu pakrovimu",
+          "Pirmosios pagalbos rinkinys ir būtini vaistai",
+          "Asmens dokumentų kopijos",
+          "Grynieji pinigai",
+          "Išorinė baterija telefonui ir laidas",
+          "Šilti drabužiai ir neperšlampamas apsiaustas",
+          "Higienos reikmenys",
+          "Švilpukas",
+          "Svarbių telefono numerių sąrašas popieriuje"
+        ] },
+        { "kind": "text", "text": "Kuprinę laikykite lengvai pasiekiamoje vietoje ir kas pusmetį patikrinkite maisto bei vaistų galiojimą." }
+      ],
+      "sources": [
+        { "title": "PAGD – pasiruošimas ekstremalioms situacijoms", "url": "https://lagaminas.lt" }
+      ]
+    },
+    {
+      "id": "sirenos",
+      "categoryId": "crisis",
+      "title": "Sirenos ir įspėjimai",
+      "summary": "Apie pavojų gyventojai įspėjami sirenomis ir pranešimais į mobiliuosius telefonus.",
+      "keywords": ["signalas", "dėmesio visiems", "pavojus", "priedanga", "lrt"],
+      "blocks": [
+        { "kind": "text", "text": "Sirenų signalas „Dėmesio visiems!“ – kaukiantis garsas, trunkantis apie 3 minutes." },
+        { "kind": "steps", "heading": "Išgirdus sirenas", "items": [
+          "Įsijunkite LRT radiją ar televiziją arba perskaitykite oficialų pranešimą telefone.",
+          "Vykdykite institucijų nurodymus.",
+          "Jei liepiama slėptis – eikite į artimiausią priedangą arba pastato vidų, toliau nuo langų.",
+          "Pasiimkite 72 val. kuprinę, jei liepiama evakuotis."
+        ] },
+        { "kind": "warning", "text": "Vadovaukitės tik oficialia informacija – nedalinkite nepatikrintų gandų." }
+      ],
+      "sources": [
+        { "title": "PAGD – pasiruošimas ekstremalioms situacijoms", "url": "https://lagaminas.lt" }
+      ]
+    },
+    {
+      "id": "kraujavimas",
+      "categoryId": "first-aid",
+      "title": "Stiprus kraujavimas",
+      "summary": "Gyvybei pavojingą kraujavimą stabdykite iškart – tiesioginiu spaudimu.",
+      "keywords": ["žaizda", "kraujas", "turniketas", "tvarstis", "spaudimas"],
+      "emergencyCall": true,
+      "blocks": [
+        { "kind": "steps", "heading": "Ką daryti", "items": [
+          "Pasirūpinkite savo saugumu; jei turite – užsimaukite pirštines.",
+          "Skambinkite 112 arba paprašykite, kad paskambintų kas nors kitas.",
+          "Stipriai spauskite žaizdą tiesiogiai – delnu per švarų audinį ar tvarstį.",
+          "Spauskite nepertraukiamai bent 10 minučių ir netikrinkite, ar kraujavimas sustojo.",
+          "Tvarsčiui prakiurus – dėkite naują ant viršaus, senojo nenuimkite.",
+          "Jei kraujavimas iš rankos ar kojos nesustoja – uždėkite turniketą 5–7 cm virš žaizdos ir užsirašykite uždėjimo laiką."
+        ] },
+        { "kind": "warning", "text": "Turniketą naudokite tik gyvybei pavojingam galūnės kraujavimui, kurio nesustabdo spaudimas." }
+      ],
+      "sources": [
+        { "title": "Europos gaivinimo taryba (ERC) – pirmosios pagalbos gairės", "url": "https://www.erc.edu" }
+      ]
+    },
+    {
+      "id": "gaivinimas",
+      "categoryId": "first-aid",
+      "title": "Gaivinimas suaugusiajam",
+      "summary": "Žmogus nereaguoja ir normaliai nekvėpuoja – skambinkite 112 ir pradėkite krūtinės paspaudimus.",
+      "keywords": ["širdis", "kvėpavimas", "aed", "defibriliatorius", "cpr", "paspaudimai"],
+      "emergencyCall": true,
+      "blocks": [
+        { "kind": "steps", "items": [
+          "Įsitikinkite, kad aplinka saugi.",
+          "Patikrinkite, ar reaguoja: garsiai pakalbinkite ir švelniai pakratykite už pečių.",
+          "Atverkite kvėpavimo takus ir iki 10 sekundžių stebėkite, ar normaliai kvėpuoja.",
+          "Nekvėpuoja normaliai – skambinkite 112 (įjunkite garsiakalbį) ir paprašykite atnešti AED.",
+          "Darykite 30 paspaudimų krūtinės viduryje: 5–6 cm gyliu, 100–120 kartų per minutę.",
+          "Jei mokate – 2 įpūtimai, toliau kartokite 30 paspaudimų ir 2 įpūtimus.",
+          "Atnešus AED – įjunkite jį ir vykdykite balso nurodymus."
+        ] },
+        { "kind": "warning", "text": "Jei nemokate arba negalite daryti įpūtimų – nepertraukiamai spauskite krūtinę, kol atvyks pagalba." }
+      ],
+      "sources": [
+        { "title": "Europos gaivinimo taryba (ERC) – gaivinimo gairės", "url": "https://www.erc.edu" }
+      ]
+    },
+    {
+      "id": "hipotermija",
+      "categoryId": "first-aid",
+      "title": "Sušalimas (hipotermija)",
+      "summary": "Kūno temperatūra nukrenta per žemai – svarbiausia sulaikyti tolesnį šilumos praradimą.",
+      "keywords": ["šaltis", "drebulys", "sušalęs", "temperatūra", "sušilti"],
+      "blocks": [
+        { "kind": "bullets", "heading": "Požymiai", "items": [
+          "Drebulys, sustingę pirštai",
+          "Sumišimas, mieguistumas, nerišli kalba",
+          "Sunkiais atvejais drebulys liaujasi"
+        ] },
+        { "kind": "steps", "heading": "Ką daryti", "items": [
+          "Skambinkite 112, jei žmogus sumišęs, mieguistas ar nebedreba.",
+          "Perkelkite nuo vėjo ir drėgmės, izoliuokite nuo žemės.",
+          "Pakeiskite šlapius drabužius sausais, apklokite, uždenkite galvą.",
+          "Duokite šilto saldaus gėrimo, tik jei žmogus gali saugiai nuryti.",
+          "Judinkite atsargiai, laikykite gulintį."
+        ] },
+        { "kind": "warning", "text": "Netrinkite galūnių ir nedėkite žmogaus į karštą vandenį." }
+      ],
+      "sources": [
+        { "title": "Lietuvos Raudonasis Kryžius", "url": "https://www.redcross.lt" }
+      ]
+    },
+    {
+      "id": "vanduo",
+      "categoryId": "wild",
+      "title": "Vandens nukenksminimas",
+      "summary": "Natūralaus vandens telkinių vanduo gali būti užterštas mikroorganizmais – prieš gerdami jį nukenksminkite.",
+      "keywords": ["gerti", "virinti", "tabletės", "filtras", "upė", "šaltinis"],
+      "blocks": [
+        { "kind": "steps", "items": [
+          "Rinkitės kuo skaidresnį, geriausia tekantį vandenį.",
+          "Drumstą vandenį pirmiausia nusodinkite ir perfiltruokite per audinį.",
+          "Užvirinkite ir pavirinkite bent 1 minutę.",
+          "Jei virinti negalima – naudokite vandens dezinfekavimo tabletes pagal gamintojo instrukciją."
+        ] },
+        { "kind": "warning", "text": "Virinimas nepašalina cheminės taršos – nesemkite vandens prie laukų, kelių ar pramonės įmonių." }
+      ],
+      "sources": [
+        { "title": "Pasaulio sveikatos organizacija (PSO) – geriamojo vandens kokybė", "url": "https://www.who.int" }
+      ]
+    },
+    {
+      "id": "kryptis-be-kompaso",
+      "categoryId": "wild",
+      "title": "Kryptis be kompaso",
+      "summary": "Kai kompaso nėra, apytikrę kryptį padės nustatyti saulė ir žvaigždės.",
+      "keywords": ["šiaurė", "saulė", "žvaigždė", "orientavimasis", "navigacija"],
+      "blocks": [
+        { "kind": "bullets", "items": [
+          "Saulė teka rytuose ir leidžiasi vakaruose (vasarą – šiaurės rytuose ir šiaurės vakaruose).",
+          "Vidurdienį saulė yra pietuose: Lietuvoje apie 12–13 val. žiemos laiku ir 13–14 val. vasaros laiku.",
+          "Naktį Šiaurinė žvaigždė rodo šiaurę. Ją rasite, pratęsę Didžiųjų Grįžulo Ratų „kaušo“ kraštinę maždaug penkis kartus."
+        ] },
+        { "kind": "warning", "text": "Samanos ir medžių šakos – nepatikimas krypties ženklas." }
+      ],
+      "sources": [
+        { "title": "Išlik – Navigacijos kursas, pamoka „Kompaso azimutas“" }
+      ]
+    },
+    {
+      "id": "pasiklydus",
+      "categoryId": "wild",
+      "title": "Pasiklydus miške",
+      "summary": "Svarbiausia – sustoti. Klaidžiojimas dažniausiai tik pablogina padėtį.",
+      "keywords": ["pasiklydau", "miškas", "nakvynė", "švilpukas", "koordinatės"],
+      "emergencyCall": true,
+      "blocks": [
+        { "kind": "steps", "items": [
+          "Sustokite ir nusiraminkite.",
+          "Prisiminkite, iš kur atėjote ir kokius orientyrus matėte.",
+          "Apsidairykite ir įsiklausykite: keliai, upeliai, elektros linijos, transporto garsai.",
+          "Jei temsta arba nežinote krypties – likite vietoje ir ruoškitės nakvynei.",
+          "Skambinkite 112 – telefonas gali nustatyti jūsų vietą. Taupykite bateriją.",
+          "Būkite matomi ir girdimi: trys signalai švilpuku – pagalbos ženklas."
+        ] }
+      ],
+      "sources": [
+        { "title": "Bendrasis pagalbos centras", "url": "https://bpc.lt" }
+      ]
+    },
+    {
+      "id": "elektros-nebuvimas",
+      "categoryId": "crisis",
+      "title": "Dingus elektrai",
+      "summary": "Ilgesniam elektros nebuvimui pasiruoškite iš anksto ir taupykite išteklius.",
+      "keywords": ["elektra", "šviesa", "šildymas", "šaldytuvas", "telefonas"],
+      "blocks": [
+        { "kind": "steps", "items": [
+          "Išjunkite elektros prietaisus, kad grįžus įtampai jie nesugestų.",
+          "Šaldytuvą ir šaldiklį atidarinėkite kuo rečiau.",
+          "Informaciją sekite per radiją su baterijomis.",
+          "Telefoną naudokite tik būtiniems ryšiams, įjunkite energijos taupymo režimą."
+        ] },
+        { "kind": "warning", "text": "Nesišildykite ir negaminkite su dujine ar anglių įranga uždarose patalpose – pavojus apsinuodyti anglies monoksidu." }
+      ],
+      "sources": [
+        { "title": "PAGD – pasiruošimas ekstremalioms situacijoms", "url": "https://lagaminas.lt" }
+      ]
+    }
+  ]
+}

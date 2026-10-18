@@ -7,4 +7,8 @@ abstract final class Env {
   /// Be raktų programėlė veikia su vietinėmis pamokomis iš `assets/`.
   static bool get hasSupabase =>
       supabaseUrl.isNotEmpty && supabasePublishableKey.isNotEmpty;
+
+  /// Gilioji nuoroda, į kurią grąžina Supabase laiškų nuorodos (turi būti
+  /// Supabase → Authentication → URL Configuration → Redirect URLs sąraše).
+  static const authRedirectUrl = 'lt.islik://auth-callback';
 }
