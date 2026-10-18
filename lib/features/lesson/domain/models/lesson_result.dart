@@ -3,19 +3,27 @@ import 'lesson.dart';
 
 /// Pamokos bandymo rezultatas – perduodamas rezultatų ekranui.
 class LessonResult {
-  const LessonResult({
+  LessonResult({
     required this.lessonId,
     required this.correctCount,
     required this.gradedCount,
     required this.xpEarned,
     required this.duration,
-  });
+    DateTime? completedAt,
+  }) : _completedAt = completedAt;
 
   final String lessonId;
   final int correctCount;
   final int gradedCount;
   final int xpEarned;
   final Duration duration;
+  final DateTime? _completedAt;
+
+  /// Kada pamoka baigta (pagal nutylėjimą – sukūrimo metu).
+  late final DateTime completedAt = _completedAt ?? DateTime.now();
+
+  /// Pamokos pradžia – po jos gauti ženkleliai rodomi rezultatų ekrane.
+  DateTime get startedAt => completedAt.subtract(duration);
 
   double get accuracy => gradedCount == 0 ? 1 : correctCount / gradedCount;
   int get stars => UserProgress.starsForAccuracy(accuracy);

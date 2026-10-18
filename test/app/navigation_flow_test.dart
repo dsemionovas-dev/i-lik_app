@@ -12,6 +12,7 @@ import 'package:islik/features/auth/domain/app_user.dart';
 import 'package:islik/features/guide/application/guide_providers.dart';
 import 'package:islik/features/leagues/data/league_repository.dart';
 import 'package:islik/features/lesson/data/lesson_repository.dart';
+import 'package:islik/features/profile/presentation/profile_screen.dart';
 import 'package:islik/features/progress/application/progress_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -59,6 +60,16 @@ Future<void> tapHotspot(WidgetTester tester, double x, double y) async {
   final r = tester.getRect(canvas);
   await tester.tapAt(r.topLeft + Offset(r.width * x, r.height * y));
   await tester.pump();
+}
+
+/// Profilio sąraše paslenka iki [finder] (ilgas sąrašas – apačia dar nesukurta).
+Future<void> revealInProfile(WidgetTester tester, Finder finder) async {
+  final list = find.descendant(of: find.byType(ProfileScreen), matching: find.byType(Scrollable)).first;
+  // Į viršų – be „patraukti žemyn“ (jis paleistų sinchronizaciją).
+  tester.state<ScrollableState>(list).position.jumpTo(0);
+  await tester.pumpAndSettle();
+  await tester.scrollUntilVisible(finder, 150, scrollable: list);
+  await tester.pumpAndSettle();
 }
 
 /// Profilio statistikos plytelės reikšmė pagal pavadinimą.
@@ -248,6 +259,11 @@ void main() {
     expect(find.text('Tikslumas: 86 %'), findsOneWidget);
     // Be Supabase – tik šiame įrenginyje.
     expect(find.text('Progresas išsaugotas šiame įrenginyje.'), findsOneWidget);
+    // Pirmoji pamoka; skyriuje „Kompasas“ ji vienintelė.
+    expect(find.text('Nauji ženkleliai!'), findsOneWidget);
+    expect(find.byKey(const ValueKey('new-badge-pirmoji-pamoka')), findsOneWidget);
+    expect(find.byKey(const ValueKey('new-badge-kompaso-meistras')), findsOneWidget);
+    expect(find.byKey(const ValueKey('new-badge-be-klaidu')), findsNothing, reason: '86 %, ne 100 %');
 
     await tester.tap(find.text('TĘSTI'));
     await tester.pumpAndSettle();
@@ -259,6 +275,24 @@ void main() {
     await tester.pumpAndSettle();
     expect(statValue(tester, 'XP'), '25');
     expect(statValue(tester, 'Baigtos pamokos'), '1');
+    expect(statValue(tester, 'Serija (d.)'), '1');
+
+    // Ženkleliai: gautas – su data, negautas – su progresu.
+    await revealInProfile(tester, find.text('Ženkleliai · 2 iš 11'));
+    await tester.tap(find.byKey(const ValueKey('badge-pirmoji-pamoka')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Gautas 20'), findsOneWidget);
+    await tester.tapAt(const Offset(20, 20)); // uždaryti
+    await tester.pumpAndSettle();
+    await revealInProfile(tester, find.byKey(const ValueKey('badge-smalsuolis')));
+    expect(find.text('1 / 5'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('badge-smalsuolis')));
+    await tester.pumpAndSettle();
+    expect(find.text('Baik 5 pamokas.'), findsOneWidget);
+    expect(find.text('Progresas: 1 / 5'), findsOneWidget);
+    await tester.tapAt(const Offset(20, 20));
+    await tester.pumpAndSettle();
+
     await tester.tap(find.text('Kelias'));
     await tester.pumpAndSettle();
     // Navigacijos kursas – trečias, žemiau ekrano.
@@ -372,6 +406,7 @@ void main() {
       await pumpApp(tester, onboarded: true, overrides: online());
       await tester.tap(find.text('Profilis'));
       await tester.pumpAndSettle();
+      await revealInProfile(tester, find.text('Paskyra'));
       expect(find.textContaining('Nustatykite slaptažodį'), findsOneWidget);
 
       Future<void> submit(String password, String confirmation) async {
@@ -399,6 +434,7 @@ void main() {
       await pumpApp(tester, onboarded: true, overrides: online());
       await tester.tap(find.text('Profilis'));
       await tester.pumpAndSettle();
+      await revealInProfile(tester, find.text('Paskyra'));
       expect(find.textContaining('Laukiama patvirtinimo: jonas@pastas.lt'), findsOneWidget);
 
       auth.afterRefresh = const AppUser(id: 'guest-1', email: 'jonas@pastas.lt', needsPassword: true);
@@ -415,6 +451,7 @@ void main() {
       await pumpApp(tester, onboarded: true, overrides: online());
       await tester.tap(find.text('Profilis'));
       await tester.pumpAndSettle();
+      await revealInProfile(tester, find.text('Jau turiu paskyrą'));
       await tapVisible(tester, find.text('Jau turiu paskyrą'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byKey(const ValueKey('email-field')), 'jonas@pastas.lt');
@@ -446,8 +483,9 @@ void main() {
 
       await tester.tap(find.text('Grįžti'));
       await tester.pumpAndSettle();
+      await revealInProfile(tester, find.byKey(const ValueKey('account-email')));
       expect(find.byKey(const ValueKey('account-email')), findsOneWidget);
-      expect(find.text('jonas@pastas.lt'), findsOneWidget);
+      expect(find.text('jonas@pastas.lt'), findsWidgets);
     });
 
     testWidgets('atidarius atstatymo nuorodą iš laiško – naujo slaptažodžio ekranas', (tester) async {
@@ -469,6 +507,31 @@ void main() {
       await tester.tap(find.text('Grįžti'));
       await tester.pumpAndSettle();
       expect(find.byType(NavigationBar), findsOneWidget);
+    });
+
+    testWidgets('profilio vardas ir avataras', (tester) async {
+      await pumpApp(tester, onboarded: true, overrides: online());
+      await tester.tap(find.text('Profilis'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('profile-name')), findsOneWidget);
+      expect(tester.widget<Text>(find.byKey(const ValueKey('profile-name'))).data, startsWith('Žygeivis '));
+
+      await tester.tap(find.byTooltip('Redaguoti profilį'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const ValueKey('display-name-field')), 'Jo');
+      await tester.tap(find.text('Išsaugoti'));
+      await tester.pumpAndSettle();
+      expect(find.text('Vardas per trumpas – bent 3 simboliai.'), findsOneWidget);
+
+      await tester.enterText(find.byKey(const ValueKey('display-name-field')), 'Miško Lapė');
+      await tester.tap(find.byKey(const ValueKey('avatar-owl')));
+      await tester.pumpAndSettle();
+      await tapVisible(tester, find.text('Išsaugoti'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Profilis išsaugotas.'), findsOneWidget);
+      expect(tester.widget<Text>(find.byKey(const ValueKey('profile-name'))).data, 'Miško Lapė');
+      expect(tester.widget<Text>(find.byKey(const ValueKey('profile-avatar'))).data, '🦉');
     });
 
     testWidgets('profilyje – lygos kortelė, paspaudus – lentelė', (tester) async {
@@ -543,6 +606,7 @@ void main() {
       await pumpApp(tester, onboarded: true, overrides: online());
       await tester.tap(find.text('Profilis'));
       await tester.pumpAndSettle();
+      await revealInProfile(tester, find.text('Susieti el. paštą'));
       expect(find.text('Svečio režimas'), findsOneWidget);
 
       await tester.tap(find.text('Susieti el. paštą'));
@@ -566,6 +630,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Profilis'));
       await tester.pumpAndSettle();
+      await revealInProfile(tester, find.text('Atsijungti'));
       expect(find.byKey(const ValueKey('account-email')), findsOneWidget);
 
       await tapVisible(tester, find.text('Atsijungti'));
@@ -575,7 +640,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(auth.currentUser, isNull);
+      await revealInProfile(tester, find.text('XP'));
       expect(statValue(tester, 'XP'), '0');
+      await revealInProfile(tester, find.text('Neprisijungta.'));
       expect(find.text('Neprisijungta.'), findsOneWidget);
     });
   });

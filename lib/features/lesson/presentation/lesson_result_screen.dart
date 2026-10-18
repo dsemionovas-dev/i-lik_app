@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/router/routes.dart';
+import '../../badges/presentation/badges_section.dart';
 import '../../progress/application/progress_controller.dart';
 import '../domain/models/lesson_result.dart';
 
@@ -39,6 +40,10 @@ class LessonResultScreen extends ConsumerWidget {
                 Text('+${r.xpEarned} XP', style: text.headlineSmall, textAlign: TextAlign.center),
                 Text('Tikslumas: ${(r.accuracy * 100).round()} %',
                     style: text.titleMedium, textAlign: TextAlign.center),
+              ],
+              if (r != null) ...[
+                const SizedBox(height: 24),
+                NewBadgesNote(since: r.startedAt),
               ],
               if (progress != null) ...[
                 const SizedBox(height: 24),

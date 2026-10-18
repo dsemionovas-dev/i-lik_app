@@ -121,6 +121,14 @@ ContentRepository ── 1. Supabase (SupabaseLessonRemoteDataSource)
 - Paieška be lietuviškų raidžių („siaure“ → „šiaurė“), kategorijos, mygtukas „Skambinti 112“, kuprinės kontrolinis sąrašas (žymės saugomos įrenginyje).
 - **Turinį prieš išleidžiant turi patvirtinti ekspertas** (PRD) – ypač pirmąją pagalbą ir civilinės saugos informaciją bei šaltinių nuorodas.
 
+## Ženkleliai ir profilis
+
+- 11 ženklelių (`assets/badges.json`): pamokų skaičius, pamoka be klaidų, XP, serija (3 / 7 / 30 d.), baigtas skyrius („Kompaso meistras“, „Ugnies meistras“).
+- Taisyklės vertinamos **įrenginyje** (iškart, ir be ryšio) ir **serveryje** (`award_badges` – trigeris po kiekvieno progreso pokyčio), todėl ženkleliai išlieka visuose įrenginiuose. Testas tikrina, kad programėlės ir migracijos sąrašai sutampa.
+- Serija – dienos iš eilės su bent viena pamoka (įrenginio kalendorius; serveryje – Europe/Vilnius).
+- Profilyje: avataras, vardas, serija, ženklelių tinklelis (gauti – spalvoti su data, negauti – pilki su sąlyga ir progresu). Rezultatų ekrane – per pamoką gauti ženkleliai.
+- Profilis (`profiles`): vardas 3–24 simboliai (be el. pašto / HTML) ir avataras iš 10 miško gyvūnų. Vardas rodomas lygoje (atnaujinamas ir šios savaitės lentelėje).
+
 ## Lygos
 
 - 10 lygų (Pradinukas → Rangeris), grupės iki 30, savaitė – pirmadienis 00:00 Europe/Vilnius. Top 7 kyla, paskutiniai 5 krenta (1 lygoje nekrentama, 10-oje nekylama; mažoje grupėje kilimo zona turi pirmenybę).

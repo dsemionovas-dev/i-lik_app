@@ -13,13 +13,18 @@ class ProgressSnapshot {
     this.ownerId,
     Map<String, UserProgress>? progress,
     List<LessonAttempt>? outbox,
+    Set<String>? activityDays,
   })  : progress = progress ?? {},
-        outbox = outbox ?? [];
+        outbox = outbox ?? [],
+        activityDays = activityDays ?? {};
 
   /// Kieno tai duomenys; pasikeitus vartotojui vietinė kopija nebetinka.
   String? ownerId;
   final Map<String, UserProgress> progress;
   final List<LessonAttempt> outbox;
+
+  /// Vietinės kalendorinės dienos (`YYYY-MM-DD`), kai užbaigta bent viena pamoka – serijai.
+  final Set<String> activityDays;
 
   factory ProgressSnapshot.fromJson(Json json) => ProgressSnapshot(
         ownerId: json['ownerId'] as String?,
@@ -27,12 +32,14 @@ class ProgressSnapshot {
           for (final p in parseList(json['progress'], UserProgress.fromLocalJson)) p.lessonId: p,
         },
         outbox: parseList(json['outbox'], LessonAttempt.fromJson),
+        activityDays: {...parseStringList(json['activityDays'])},
       );
 
   Json toJson() => {
         'ownerId': ownerId,
         'progress': progress.values.map((p) => p.toLocalJson()).toList(),
         'outbox': outbox.map((a) => a.toJson()).toList(),
+        'activityDays': (activityDays.toList()..sort()),
       };
 }
 

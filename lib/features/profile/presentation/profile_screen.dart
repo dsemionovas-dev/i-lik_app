@@ -3,12 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/router/routes.dart';
+import '../../auth/data/auth_repository.dart';
 import '../../auth/presentation/account_section.dart';
+import '../../badges/application/badge_controller.dart';
+import '../../badges/domain/badge.dart';
+import '../../badges/presentation/badges_section.dart';
+import '../application/profile_controller.dart';
 import '../../leagues/data/league_repository.dart';
 import '../../progress/application/progress_controller.dart';
 import '../../progress/application/progress_service.dart';
 
-/// TODO: XP grafikas, kursų progresas, ženkleliai.
+/// TODO: XP grafikas, kursų progresas.
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
@@ -29,12 +34,17 @@ class ProfileScreen extends ConsumerWidget {
       body: RefreshIndicator(
         onRefresh: () async {
           await ref.read(progressControllerProvider.notifier).syncNow();
-          ref.invalidate(leagueProvider);
+          ref
+            ..invalidate(leagueProvider)
+            ..invalidate(serverBadgesProvider)
+            ..invalidate(profileControllerProvider);
         },
         child: ListView(
           children: [
+            const _ProfileHeader(),
             if (progress != null) _Stats(progress: progress),
             const _LeagueCard(),
+            const BadgesSection(),
             const AccountSection(),
           ],
         ),
@@ -61,6 +71,12 @@ class _Stats extends StatelessWidget {
           Row(
             children: [
               Expanded(child: _StatTile(value: '${progress.totalXp}', label: 'XP')),
+              Expanded(
+                child: _StatTile(
+                  value: '${Streak.of(progress.activityDays, today: DateTime.now()).current}',
+                  label: 'Serija (d.)',
+                ),
+              ),
               Expanded(child: _StatTile(value: '${progress.completedLessons}', label: 'Baigtos pamokos')),
             ],
           ),
@@ -125,6 +141,36 @@ class _LeagueCard extends ConsumerWidget {
         trailing: const Icon(Icons.chevron_right),
         onTap: () => context.go(Routes.league),
       ),
+    );
+  }
+}
+
+/// Avataras, vardas ir „Redaguoti“.
+class _ProfileHeader extends ConsumerWidget {
+  const _ProfileHeader();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(profileControllerProvider).value;
+    final user = ref.watch(authStateProvider).value;
+    if (state == null) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+    return ListTile(
+      contentPadding: const EdgeInsets.fromLTRB(16, 16, 8, 0),
+      leading: CircleAvatar(
+        radius: 28,
+        backgroundColor: theme.colorScheme.primaryContainer,
+        child: Text(state.profile.avatarEmoji, key: const ValueKey('profile-avatar'), style: const TextStyle(fontSize: 28)),
+      ),
+      title: Text(state.displayName, key: const ValueKey('profile-name'), style: theme.textTheme.titleLarge),
+      subtitle: Text(user == null ? 'Neprisijungta' : (user.isAnonymous ? 'Svečias' : user.email ?? '')),
+      trailing: state.userId == null
+          ? null
+          : IconButton(
+              tooltip: 'Redaguoti profilį',
+              icon: const Icon(Icons.edit_outlined),
+              onPressed: () => context.go(Routes.editProfile),
+            ),
     );
   }
 }

@@ -1,0 +1,15 @@
+{
+  "badges": [
+    { "id": "pirmoji-pamoka", "title": "Pirmasis žingsnis", "description": "Baik pirmą pamoką.", "icon": "flag", "rule": { "type": "lessons_completed", "count": 1 } },
+    { "id": "smalsuolis", "title": "Smalsuolis", "description": "Baik 5 pamokas.", "icon": "explore", "rule": { "type": "lessons_completed", "count": 5 } },
+    { "id": "patyres-zygeivis", "title": "Patyręs žygeivis", "description": "Baik 20 pamokų.", "icon": "hiking", "rule": { "type": "lessons_completed", "count": 20 } },
+    { "id": "be-klaidu", "title": "Be klaidų", "description": "Baik pamoką be nė vienos klaidos.", "icon": "star", "rule": { "type": "perfect_lessons", "count": 1 } },
+    { "id": "serija-3", "title": "Įsibėgėjimas", "description": "Mokykis 3 dienas iš eilės.", "icon": "fire", "rule": { "type": "streak_days", "days": 3 } },
+    { "id": "serija-7", "title": "7 dienų serija", "description": "Mokykis 7 dienas iš eilės.", "icon": "fire", "rule": { "type": "streak_days", "days": 7 } },
+    { "id": "serija-30", "title": "Mėnuo be pertraukos", "description": "Mokykis 30 dienų iš eilės.", "icon": "fire", "rule": { "type": "streak_days", "days": 30 } },
+    { "id": "xp-100", "title": "Šimtukas", "description": "Surink 100 XP.", "icon": "bolt", "rule": { "type": "total_xp", "xp": 100 } },
+    { "id": "xp-1000", "title": "Tūkstantininkas", "description": "Surink 1000 XP.", "icon": "bolt", "rule": { "type": "total_xp", "xp": 1000 } },
+    { "id": "kompaso-meistras", "title": "Kompaso meistras", "description": "Baik visas skyriaus „Kompasas“ pamokas.", "icon": "compass", "rule": { "type": "unit_completed", "unitId": "nav-u02" } },
+    { "id": "ugnies-meistras", "title": "Ugnies meistras", "description": "Baik visas skyriaus „Ugnis“ pamokas.", "icon": "fire_master", "rule": { "type": "unit_completed", "unitId": "wild-u02" } }
+  ]
+}

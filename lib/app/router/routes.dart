@@ -7,6 +7,7 @@ abstract final class Routes {
   static const profile = '/profile';
   static const settings = '/profile/settings';
   static const league = '/profile/league';
+  static const editProfile = '/profile/edit';
 
   static const resetPasswordPath = '/reset-password';
   static const newPassword = '$resetPasswordPath?step=new';

@@ -13,6 +13,7 @@ import '../../features/lesson/presentation/lesson_screen.dart';
 import '../../features/lesson_tree/presentation/lesson_tree_screen.dart';
 import '../../features/onboarding/data/onboarding_controller.dart';
 import '../../features/onboarding/presentation/onboarding_screen.dart';
+import '../../features/profile/presentation/edit_profile_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/profile/presentation/settings_screen.dart';
 import 'routes.dart';
@@ -86,6 +87,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 GoRoute(
                   path: 'league',
                   builder: (context, state) => const LeagueScreen(),
+                ),
+                GoRoute(
+                  path: 'edit',
+                  builder: (context, state) => const EditProfileScreen(),
                 ),
               ],
             ),

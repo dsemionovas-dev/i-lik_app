@@ -9,6 +9,13 @@ import '../data/progress_store.dart';
 import '../domain/models/lesson_attempt.dart';
 import '../domain/models/user_progress.dart';
 
+/// Vietinė kalendorinė diena `YYYY-MM-DD` (serijai skaičiuoti).
+String dayKey(DateTime time) {
+  final t = time.toLocal();
+  String two(int n) => n.toString().padLeft(2, '0');
+  return '${t.year}-${two(t.month)}-${two(t.day)}';
+}
+
 enum SyncStatus {
   /// Serveris nesukonfigūruotas – progresas tik įrenginyje.
   disabled,
@@ -106,6 +113,7 @@ class ProgressService {
 
     snapshot.progress[lessonId] = updated;
     snapshot.outbox.add(attempt);
+    snapshot.activityDays.add(dayKey(now));
     await _persist();
     return updated;
   }
@@ -170,7 +178,8 @@ class ProgressService {
     snapshot
       ..ownerId = null
       ..progress.clear()
-      ..outbox.clear();
+      ..outbox.clear()
+      ..activityDays.clear();
     await _persist();
   }
 
@@ -183,7 +192,8 @@ class ProgressService {
       _log('Pasikeitė vartotojas – vietinis progresas išvalomas', snapshot.ownerId!);
       snapshot
         ..progress.clear()
-        ..outbox.clear();
+        ..outbox.clear()
+        ..activityDays.clear();
     }
     snapshot.ownerId = userId;
     await _persist();

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/supabase/supabase_providers.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../auth/domain/app_user.dart';
+import '../../badges/application/badge_controller.dart';
 import '../../leagues/data/league_repository.dart';
 import '../../lesson/domain/models/lesson.dart';
 import '../../lesson/domain/models/lesson_result.dart';
@@ -18,6 +19,7 @@ class ProgressState {
     required this.progress,
     required this.pending,
     required this.syncEnabled,
+    this.activityDays = const {},
     this.lastSync,
   });
 
@@ -26,6 +28,9 @@ class ProgressState {
   /// Dar neišsiųsti bandymai.
   final int pending;
   final bool syncEnabled;
+
+  /// Dienos su užbaigta pamoka (`YYYY-MM-DD`).
+  final Set<String> activityDays;
   final SyncResult? lastSync;
 
   int get totalXp => progress.values.fold(0, (sum, p) => sum + p.xpEarned);
@@ -83,7 +88,12 @@ class ProgressController extends AsyncNotifier<ProgressState> {
     if (!ref.mounted) return result;
     state = AsyncData(_stateFrom(_service, lastSync: result));
     // Išsiųsti bandymai pakeitė savaitės XP lygoje.
-    if (result.uploaded > 0) ref.invalidate(leagueProvider);
+    if (result.uploaded > 0) {
+      ref
+        ..invalidate(leagueProvider)
+        // Serveris galėjo suteikti ženklelių (ir už kituose įrenginiuose baigtas pamokas).
+        ..invalidate(serverBadgesProvider);
+    }
     return result;
   }
 
@@ -99,6 +109,7 @@ class ProgressController extends AsyncNotifier<ProgressState> {
       progress: Map.unmodifiable(snapshot.progress),
       pending: snapshot.outbox.length,
       syncEnabled: service.syncEnabled,
+      activityDays: Set.unmodifiable(snapshot.activityDays),
       lastSync: lastSync,
     );
   }
