@@ -1,0 +1,14 @@
+{
+  "courses": [
+    { "id": "wilderness", "title": "Išgyvenimas gamtoje", "description": "Vanduo, ugnis, pastogė, maistas, pirmoji pagalba", "order": 1 },
+    { "id": "gear", "title": "Įranga", "description": "Peilis, kirvis, viryklė, kuprinė, mazgai", "order": 2 },
+    { "id": "navigation", "title": "Navigacija", "description": "Žemėlapis, kompasas, koordinatės, orientyrai", "order": 3 },
+    { "id": "civil", "title": "Pilietinis saugumas", "description": "72 val. kuprinė, sirenos, priedangos, evakuacija", "order": 4 }
+  ],
+  "units": [
+    { "id": "nav-u02", "courseId": "navigation", "title": "Kompasas", "description": "Azimutas ir krypties išlaikymas", "order": 2 }
+  ],
+  "lessons": [
+    { "id": "nav-u02-l03", "courseId": "navigation", "unitId": "nav-u02", "title": "Kompaso azimutas", "order": 3, "version": 4, "estimatedMinutes": 5 }
+  ]
+}

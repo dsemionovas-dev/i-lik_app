@@ -4,7 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:islik/app/app.dart';
 import 'package:islik/core/storage/shared_preferences_provider.dart';
+import 'package:islik/features/lesson/data/lesson_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../helpers/fakes.dart';
 
 Future<void> pumpApp(WidgetTester tester, {bool onboarded = false}) async {
   // Kešuotas ankstesnio testo Future neužsibaigia naujo testo fake-async zonoje.
@@ -12,7 +15,10 @@ Future<void> pumpApp(WidgetTester tester, {bool onboarded = false}) async {
   SharedPreferences.setMockInitialValues({'onboarding_completed': onboarded});
   final prefs = await SharedPreferences.getInstance();
   await tester.pumpWidget(ProviderScope(
-    overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+    overrides: [
+      sharedPreferencesProvider.overrideWithValue(prefs),
+      lessonCacheProvider.overrideWithValue(InMemoryLessonCache()),
+    ],
     child: const IslikApp(),
   ));
   await tester.pumpAndSettle();

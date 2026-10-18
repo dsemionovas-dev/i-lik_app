@@ -75,8 +75,33 @@ Visi 8 PRD tipai turi UI (`lib/features/lesson/presentation/widgets/`): `info_ca
 
 `hotspot` turinyje privalo nurodyti `aspectRatio` (paveikslėlio plotis / aukštis): paveikslėlis ištempiamas į šį rėmą, kad santykinės koordinatės sutaptų. `targetAreas[].r` – spindulys pločio dalimis.
 
+## Turinys: Supabase + offline
+
+```
+LessonTreeScreen / LessonScreen
+        │  catalogProvider, lessonProvider
+        ▼
+ContentRepository ── 1. Supabase (SupabaseLessonRemoteDataSource)
+        │            2. kešas    (FileLessonCache → content_cache/*.json)
+        │            3. assets   (BundledContentSource → assets/catalog.json, assets/lessons/)
+```
+
+- **Katalogas** (kursai, skyriai, pamokų santraukos su `version`): tinklas → kešas → assets.
+- **Pamoka**: jei kešo versija ≥ katalogo – iš kešo be tinklo; kitaip atsisiunčiama ir kešuojama; nepavykus – pasenusi kešo kopija, tada assets.
+- `syncLessons(unitId:)` atsisiunčia tik pasikeitusias pamokas.
+- Tinklo užklausų laiko riba – 8 s. Kešo klaidos pamokos nesustabdo.
+- „Kelias“ ekranas rodo pranešimą, kai turinys ne iš serverio.
+
+### Supabase paruošimas
+
+1. `supabase link --project-ref <ref>` ir `supabase db push` – sukuria `courses`, `units`, `lessons` su RLS (`supabase/migrations/`).
+2. Turinį rašo CMS / administratorius su `service_role` raktu. Programėlė mato tik `published` kursus / skyrius ir `approved` pamokas.
+3. `lessons.content` – visas pamokos JSON; `id` ir `version` turi sutapti su eilute (DB apribojimas). Pakeitus turinį, `version` didinama – programėlės atnaujina kešą.
+4. Paleidimas: `flutter run --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_PUBLISHABLE_KEY=...`
+
 ## Kiti žingsniai
 
 - `LessonSessionController` (Notifier) vietoje `_LessonRunner` būsenos
-- Drift (SQLite) kešas pamokoms ir progreso sinchronizacijos eilė
+- Progreso sinchronizacijos eilė (čia verta Drift / SQLite)
+- `syncLessons()` iškvietimas fone / mygtukas „Atsisiųsti skyrių“
 - Širdelės, serija, XP įrašymas į Supabase
