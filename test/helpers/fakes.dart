@@ -9,6 +9,8 @@ import 'package:islik/features/auth/data/auth_repository.dart';
 import 'package:islik/features/auth/domain/app_user.dart';
 import 'package:islik/features/lesson/data/lesson_cache.dart';
 import 'package:islik/features/lesson/data/lesson_remote_data_source.dart';
+import 'package:islik/features/feedback/data/report_repository.dart';
+import 'package:islik/features/feedback/domain/content_report.dart';
 import 'package:islik/features/guide/data/guide_repository.dart';
 import 'package:islik/features/leagues/data/league_repository.dart';
 import 'package:islik/features/leagues/domain/league.dart';
@@ -293,5 +295,16 @@ class FakeGuideRemote implements GuideRemoteDataSource {
     calls++;
     if (error != null) throw error!;
     return guide;
+  }
+}
+
+class FakeReportRemote implements ReportRemoteDataSource {
+  final received = <ContentReport>[];
+  Object? error;
+
+  @override
+  Future<void> send(ContentReport report) async {
+    if (error != null) throw error!;
+    received.add(report);
   }
 }

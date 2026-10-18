@@ -169,6 +169,13 @@ class _LessonRunnerState extends ConsumerState<_LessonRunner> {
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(icon: const Icon(Icons.close), onPressed: _confirmClose),
+          actions: [
+            IconButton(
+              tooltip: 'Pranešti apie klaidą',
+              icon: const Icon(Icons.flag_outlined),
+              onPressed: () => context.push(Routes.report(lessonId: widget.lesson.id, itemId: item.id)),
+            ),
+          ],
           title: LinearProgressIndicator(value: (_index + (checked ? 1 : 0)) / _items.length),
         ),
         body: SafeArea(

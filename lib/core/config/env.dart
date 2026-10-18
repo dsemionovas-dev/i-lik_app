@@ -11,4 +11,7 @@ abstract final class Env {
   /// Gilioji nuoroda, į kurią grąžina Supabase laiškų nuorodos (turi būti
   /// Supabase → Authentication → URL Configuration → Redirect URLs sąraše).
   static const authRedirectUrl = 'lt.islik://auth-callback';
+
+  /// Versija pranešimuose apie klaidas; CI perduoda `--dart-define=APP_VERSION=…`.
+  static const appVersion = String.fromEnvironment('APP_VERSION', defaultValue: '0.1.0-dev');
 }

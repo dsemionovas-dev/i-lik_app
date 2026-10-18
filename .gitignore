@@ -46,3 +46,10 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Release pasirašymas – niekada į git
+android/key.properties
+*.jks
+*.keystore
+*.p12
+*.mobileprovision

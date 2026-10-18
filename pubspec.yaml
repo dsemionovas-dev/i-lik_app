@@ -25,6 +25,8 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^6.0.0
   http: ^1.6.0
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.8
 
 flutter:
   uses-material-design: true
@@ -33,3 +35,23 @@ flutter:
     - assets/lessons/
     - assets/guide/
     - assets/badges.json
+
+# Piktogramos ir užsklanda generuojamos iš assets/branding/ (pakeitus PNG – paleisti iš naujo):
+#   dart run flutter_launcher_icons
+#   dart run flutter_native_splash:create
+flutter_launcher_icons:
+  image_path: assets/branding/icon.png
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  adaptive_icon_background: "#2E7D32"
+  adaptive_icon_foreground: assets/branding/icon_foreground.png
+  min_sdk_android: 21
+
+flutter_native_splash:
+  color: "#2E7D32"
+  image: assets/branding/splash_logo.png
+  android_12:
+    color: "#2E7D32"
+    image: assets/branding/splash_logo.png
+  web: false

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../app/router/routes.dart';
 
 import '../application/guide_providers.dart';
 import '../domain/guide.dart';
@@ -14,7 +17,16 @@ class GuideCardScreen extends ConsumerWidget {
     final card = ref.watch(guideProvider).value?.card(cardId);
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(card?.title ?? 'Atmintinė')),
+      appBar: AppBar(
+        title: Text(card?.title ?? 'Atmintinė'),
+        actions: [
+          IconButton(
+            tooltip: 'Pranešti apie klaidą',
+            icon: const Icon(Icons.flag_outlined),
+            onPressed: () => context.push(Routes.report(guideCardId: cardId)),
+          ),
+        ],
+      ),
       body: card == null
           ? Center(
               child: ref.watch(guideProvider).isLoading

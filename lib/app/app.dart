@@ -5,6 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../features/auth/data/auth_repository.dart';
+import '../features/feedback/application/report_service.dart';
 import '../features/progress/application/progress_controller.dart';
 import 'router/app_router.dart';
 import 'router/routes.dart';
@@ -23,6 +24,7 @@ class _IslikAppState extends ConsumerState<IslikApp> {
 
   void _onResume() {
     unawaited(ref.read(progressControllerProvider.notifier).syncNow());
+    unawaited(ref.read(reportServiceProvider).flush());
     // El. paštas galėjo būti patvirtintas naršyklėje – atnaujinam vartotoją.
     unawaited(ref.read(authRepositoryProvider).refreshUser().then<void>((_) {}, onError: (_) {}));
   }
@@ -31,6 +33,8 @@ class _IslikAppState extends ConsumerState<IslikApp> {
   void initState() {
     super.initState();
     _lifecycle; // inicializuojam
+    // Ankstesniais kartais be ryšio sukaupti pranešimai apie klaidas.
+    WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(ref.read(reportServiceProvider).flush()));
   }
 
   @override

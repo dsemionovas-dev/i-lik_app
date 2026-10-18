@@ -2,6 +2,12 @@
 
 Žaidybiška išgyvenimo, navigacijos ir pilietinio saugumo įgūdžių mokymosi programėlė (Flutter + Riverpod + go_router + Supabase).
 
+## Beta
+
+Paketas `lt.islik.app`, pavadinimas „Išlik“. CI (`.github/workflows/ci.yml`) – analizė ir testai kiekvienam push / PR; `beta.yml` – Android AAB / APK ir iOS build'as (žyma `v*` arba rankiniu būdu). Instrukcijos: [docs/BETA.md](docs/BETA.md).
+
+Pranešimai apie klaidas: Profilis → ⚙ → „Pranešti apie klaidą“ arba vėliavėlė pamokoje / gide. Siunčiami per eilę (veikia be ryšio) į `content_reports`.
+
 ## Paleidimas
 
 ```bash

@@ -9,6 +9,9 @@ import 'package:islik/app/app.dart';
 import 'package:islik/core/storage/shared_preferences_provider.dart';
 import 'package:islik/features/auth/data/auth_repository.dart';
 import 'package:islik/features/auth/domain/app_user.dart';
+import 'package:islik/features/feedback/application/report_service.dart';
+import 'package:islik/features/feedback/domain/content_report.dart';
+import 'package:islik/features/feedback/presentation/report_screen.dart';
 import 'package:islik/features/guide/application/guide_providers.dart';
 import 'package:islik/features/leagues/data/league_repository.dart';
 import 'package:islik/features/lesson/data/lesson_repository.dart';
@@ -59,6 +62,18 @@ Future<void> tapHotspot(WidgetTester tester, double x, double y) async {
   await tester.pumpAndSettle();
   final r = tester.getRect(canvas);
   await tester.tapAt(r.topLeft + Offset(r.width * x, r.height * y));
+  await tester.pump();
+}
+
+/// Pranešimo formoje paslenka iki „Siųsti“ ir paspaudžia.
+Future<void> tapSend(WidgetTester tester) async {
+  final form = find.descendant(of: find.byType(ReportScreen), matching: find.byType(Scrollable)).first;
+  // scrollUntilVisible sustoja, kai mygtukas sukurtas (gali būti dar už ekrano) –
+  // ensureVisible jį tikrai parodo.
+  await tester.scrollUntilVisible(find.text('Siųsti'), 200, scrollable: form);
+  await tester.ensureVisible(find.text('Siųsti'));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Siųsti'));
   await tester.pump();
 }
 
@@ -138,6 +153,44 @@ void main() {
     await tester.tap(find.text('Pradžia'));
     await tester.pumpAndSettle();
     expect(find.text('Sveiki atvykę į Išlik'), findsOneWidget);
+  });
+
+  testWidgets('nustatymuose – pranešimas apie klaidą (be serverio – įrenginyje)', (tester) async {
+    await pumpApp(tester, onboarded: true);
+    await tester.tap(find.text('Profilis'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Nustatymai'));
+    await tester.pumpAndSettle();
+    expect(find.text('Versija'), findsOneWidget);
+    await tester.tap(find.text('Pranešti apie klaidą'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('report-context')), findsNothing);
+    expect(
+      tester.widget<RadioGroup<ReportCategory>>(find.byType(RadioGroup<ReportCategory>)).groupValue,
+      ReportCategory.fromKey('app_bug'),
+    );
+    await tester.enterText(find.byKey(const ValueKey('report-message')), 'Neveikia');
+    await tapSend(tester);
+    expect(find.text('Aprašykite plačiau – bent 10 simbolių.'), findsOneWidget);
+
+    await tester.enterText(find.byKey(const ValueKey('report-message')), 'Neveikia garsas pamokose.');
+    await tapSend(tester);
+    await tester.pumpAndSettle();
+    expect(find.text('Ačiū! Pranešimas išsaugotas įrenginyje.'), findsOneWidget);
+    expect(find.widgetWithText(AppBar, 'Nustatymai'), findsOneWidget);
+  });
+
+  testWidgets('gido atmintinėje – pranešti galima ir be registracijos', (tester) async {
+    await pumpApp(tester);
+    await tester.tap(find.text('Atidaryti gidą be registracijos'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('72 val. kuprinė'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Pranešti apie klaidą'));
+    await tester.pumpAndSettle();
+    expect(find.text('Gido atmintinė kuprine-72h'), findsOneWidget);
+    expect(find.text('Sveiki atvykę į Išlik'), findsNothing, reason: 'ne nukreipta į onboardingą');
   });
 
   testWidgets('skirtukai ir įdėti maršrutai', (tester) async {
@@ -388,17 +441,72 @@ void main() {
     late FakeAuthRepository auth;
     late FakeProgressRemote remote;
     late FakeLeagueRepository leagues;
+    late FakeReportRemote reports;
 
     List<Override> online() => [
           authRepositoryProvider.overrideWithValue(auth),
           progressRemoteDataSourceProvider.overrideWithValue(remote),
           leagueRepositoryProvider.overrideWithValue(leagues),
+          reportRemoteDataSourceProvider.overrideWithValue(reports),
         ];
 
     setUp(() {
       auth = FakeAuthRepository(user: const AppUser(id: 'guest-1', isAnonymous: true));
       remote = FakeProgressRemote(userId: 'guest-1');
       leagues = FakeLeagueRepository(leagueOf([30, 20, 10], tier: 3, meAt: 2));
+      reports = FakeReportRemote();
+    });
+
+    testWidgets('pamokoje – pranešimas apie klaidą su pamokos ir užduoties kontekstu', (tester) async {
+      await pumpApp(tester, onboarded: true, overrides: online());
+      await tester.tap(find.text('PRADĖTI'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('SUPRATAU'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Pranešti apie klaidą'));
+      await tester.pumpAndSettle();
+      expect(find.text('Pamoka nav-u02-l03, užduotis q2'), findsOneWidget);
+      // Iš pamokos – numatytoji kategorija „Klaida turinyje“.
+      expect(
+        tester.widget<RadioGroup<ReportCategory>>(find.byType(RadioGroup<ReportCategory>)).groupValue,
+      ReportCategory.fromKey('content_error'),
+      );
+      await tester.enterText(find.byKey(const ValueKey('report-message')), 'Rytai yra 90°, bet paaiškinime parašyta kitaip.');
+      await tapSend(tester);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Ačiū! Pranešimas išsiųstas.'), findsOneWidget);
+      final r = reports.received.single;
+      expect((r.lessonId, r.itemId, r.category), ('nav-u02-l03', 'q2', ReportCategory.contentError));
+      // Grįžtama į tą pačią užduotį.
+      expect(find.text('Koks azimutas rodo tiesiai į rytus?'), findsOneWidget);
+    });
+
+    testWidgets('be ryšio pranešimas išsaugomas ir išsiunčiamas grįžus į programėlę', (tester) async {
+      reports.error = const SocketException('nėra ryšio');
+      await pumpApp(tester, onboarded: true, overrides: online());
+      await tester.tap(find.text('Profilis'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Nustatymai'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Pranešti apie klaidą'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const ValueKey('report-category-unsafe_advice')));
+      await tester.pumpAndSettle();
+      expect(find.text('Ačiū – tokie pranešimai peržiūrimi pirmiausia.'), findsOneWidget);
+      await tester.enterText(find.byKey(const ValueKey('report-message')), 'Hipotermijos atmintinėje trūksta įspėjimo.');
+      await tapSend(tester);
+      await tester.pumpAndSettle();
+      expect(find.text('Ačiū! Pranešimas išsaugotas ir bus išsiųstas, kai atsiras ryšys.'), findsOneWidget);
+      expect(reports.received, isEmpty);
+
+      reports.error = null;
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+      expect(reports.received.single.category, ReportCategory.unsafeAdvice);
     });
 
     testWidgets('susietai paskyrai be slaptažodžio pasiūloma jį nustatyti', (tester) async {

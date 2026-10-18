@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/reset_password_screen.dart';
+import '../../features/feedback/presentation/report_screen.dart';
 import '../../features/guide/presentation/guide_card_screen.dart';
 import '../../features/guide/presentation/guide_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
@@ -104,6 +105,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => ResetPasswordScreen(
           initialEmail: state.uri.queryParameters['email'],
           newPasswordOnly: state.uri.queryParameters['step'] == 'new',
+        ),
+      ),
+
+      GoRoute(
+        path: Routes.reportPath,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => ReportScreen(
+          lessonId: state.uri.queryParameters['lesson'],
+          itemId: state.uri.queryParameters['item'],
+          guideCardId: state.uri.queryParameters['guide'],
         ),
       ),
 
