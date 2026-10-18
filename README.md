@@ -99,9 +99,25 @@ ContentRepository ── 1. Supabase (SupabaseLessonRemoteDataSource)
 3. `lessons.content` – visas pamokos JSON; `id` ir `version` turi sutapti su eilute (DB apribojimas). Pakeitus turinį, `version` didinama – programėlės atnaujina kešą.
 4. Paleidimas: `flutter run --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_PUBLISHABLE_KEY=...`
 
+## Paskyros ir progresas
+
+- **Svečias** – onboardinge sukuriamas Supabase anoniminis vartotojas (be ryšio – per pirmą sinchronizaciją). Profilyje jį galima **susieti su el. paštu**: ID nesikeičia, progresas lieka.
+- Be Supabase raktų – vietinis svečias (`LocalGuestAuthRepository`), progresas tik įrenginyje.
+- **Progresas – offline-first** (`ProgressService`):
+  1. Užbaigus pamoką vietinis progresas (XP, žvaigždutės) atnaujinamas iškart, o bandymas (su UUID) įdedamas į eilę (`progress.json`).
+  2. Eilė siunčiama per RPC `record_lesson_attempt` – iškart, paleidus programėlę, grįžus į ją ir profilyje patraukus žemyn.
+  3. Nėra ryšio / laikina klaida – bandymai lieka eilėje; serverio atmesti (22xxx, 23xxx, P0xxx) – išmetami, kad eilė neužstrigtų.
+  4. Ištuštinus eilę parsisiunčiamas `user_lesson_progress` – sujungtas iš visų įrenginių.
+- Serveris pats skaičiuoja žvaigždutes, sumuoja XP ir ignoruoja pakartotinai atsiųstą bandymą, todėl pakartojimai ir keli įrenginiai nedubliuoja taškų.
+
+### Supabase nustatymai
+
+- Authentication → Sign In / Providers: įjungti **Anonymous sign-ins** ir **Email**.
+- Rekomenduojama įjungti CAPTCHA anoniminiams prisijungimams (apsauga nuo masinio paskyrų kūrimo).
+- Migracija `…_progress.sql` sukuria `user_lesson_progress`, `lesson_attempts` ir funkciją `record_lesson_attempt` (RLS: tik savo duomenys, rašyti – tik per funkciją).
+
 ## Kiti žingsniai
 
 - `LessonSessionController` (Notifier) vietoje `_LessonRunner` būsenos
-- Progreso sinchronizacijos eilė (čia verta Drift / SQLite)
 - `syncLessons()` iškvietimas fone / mygtukas „Atsisiųsti skyrių“
 - Širdelės, serija, XP įrašymas į Supabase

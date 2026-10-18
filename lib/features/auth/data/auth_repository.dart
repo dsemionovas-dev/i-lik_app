@@ -1,0 +1,192 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
+
+import '../../../core/storage/shared_preferences_provider.dart';
+import '../../../core/supabase/supabase_providers.dart';
+import '../domain/app_user.dart';
+
+abstract interface class AuthRepository {
+  /// `false` – tik vietinis svečias (Supabase nesukonfigūruotas).
+  bool get supportsAccounts;
+
+  AppUser? get currentUser;
+
+  /// Dabartinis vartotojas, tada kiekvienas pokytis.
+  Stream<AppUser?> authStateChanges();
+
+  /// Grąžina esamą vartotoją arba sukuria svečią (PRD: svečio režimas).
+  Future<AppUser> ensureSignedIn();
+
+  Future<AppUser> signInWithEmail(String email, String password);
+
+  /// `true`, jei reikia patvirtinti el. paštą prieš prisijungiant.
+  Future<bool> signUpWithEmail(String email, String password);
+
+  /// Svečią paverčia nuolatine paskyra (tas pats ID – progresas išlieka).
+  /// Supabase išsiunčia patvirtinimo laišką.
+  Future<void> linkEmail(String email);
+
+  Future<void> signOut();
+}
+
+class SupabaseAuthRepository implements AuthRepository {
+  SupabaseAuthRepository(this._auth);
+
+  final GoTrueClient _auth;
+
+  @override
+  bool get supportsAccounts => true;
+
+  @override
+  AppUser? get currentUser => _map(_auth.currentUser);
+
+  static AppUser? _map(User? user) =>
+      user == null ? null : AppUser(id: user.id, email: user.email, isAnonymous: user.isAnonymous);
+
+  @override
+  Stream<AppUser?> authStateChanges() {
+    // Ne `async*`: jo atšaukimas laukia gotrue prenumeratos atšaukimo, kuris
+    // niekada nesibaigia – atsijungęs klausytojas užstrigtų.
+    late final StreamController<AppUser?> controller;
+    StreamSubscription<AuthState>? subscription;
+    controller = StreamController<AppUser?>(
+      onListen: () {
+        var last = currentUser;
+        controller.add(last);
+        subscription = _auth.onAuthStateChange.listen(
+          (state) {
+            final user = _map(state.session?.user);
+            if (user != last) controller.add(last = user);
+          },
+          onError: controller.addError,
+        );
+      },
+      onCancel: () => unawaited(subscription?.cancel()),
+    );
+    return controller.stream;
+  }
+
+  @override
+  Future<AppUser> ensureSignedIn() async {
+    final existing = currentUser;
+    if (existing != null) return existing;
+    final response = await _guard(_auth.signInAnonymously);
+    return _map(response.user)!;
+  }
+
+  @override
+  Future<AppUser> signInWithEmail(String email, String password) async {
+    final response = await _guard(() => _auth.signInWithPassword(email: email.trim(), password: password));
+    return _map(response.user)!;
+  }
+
+  @override
+  Future<bool> signUpWithEmail(String email, String password) async {
+    final response = await _guard(() => _auth.signUp(email: email.trim(), password: password));
+    return response.session == null;
+  }
+
+  @override
+  Future<void> linkEmail(String email) async {
+    final user = currentUser;
+    if (user == null || !user.isAnonymous) {
+      throw const AuthFailure('Susieti galima tik svečio paskyrą.');
+    }
+    await _guard(() => _auth.updateUser(UserAttributes(email: email.trim())));
+  }
+
+  @override
+  Future<void> signOut() => _guard(_auth.signOut);
+
+  static Future<T> _guard<T>(Future<T> Function() action) async {
+    try {
+      return await action();
+    } on AuthException catch (e) {
+      throw AuthFailure(describeAuthError(e));
+    } on SocketException {
+      throw const AuthFailure('Nėra interneto ryšio. Pabandykite vėliau.');
+    } on TimeoutException {
+      throw const AuthFailure('Serveris neatsako. Pabandykite vėliau.');
+    }
+  }
+}
+
+/// Supabase Auth klaidų kodai → lietuviški pranešimai.
+String describeAuthError(AuthException e) => switch (e.code) {
+      'invalid_credentials' => 'Neteisingas el. paštas arba slaptažodis.',
+      'email_not_confirmed' => 'Pirmiausia patvirtinkite el. paštą – nuoroda išsiųsta laišku.',
+      'user_already_exists' || 'email_exists' => 'Paskyra su šiuo el. paštu jau yra. Prisijunkite.',
+      'weak_password' => 'Slaptažodis per silpnas – naudokite bent 8 simbolius.',
+      'validation_failed' || 'email_address_invalid' => 'Neteisingas el. pašto adresas.',
+      'over_request_rate_limit' || 'over_email_send_rate_limit' => 'Per daug bandymų. Palaukite kelias minutes.',
+      'anonymous_provider_disabled' => 'Svečio režimas serveryje išjungtas.',
+      _ => 'Nepavyko: ${e.message}',
+    };
+
+/// Be Supabase: svečias su vietiniu ID (kūrimui ir demonstracijai).
+class LocalGuestAuthRepository implements AuthRepository {
+  LocalGuestAuthRepository(this._prefs, {Uuid uuid = const Uuid()}) : _uuid = uuid;
+
+  static const _key = 'local_guest_id';
+
+  final SharedPreferences _prefs;
+  final Uuid _uuid;
+  final _changes = StreamController<AppUser?>.broadcast();
+
+  @override
+  bool get supportsAccounts => false;
+
+  @override
+  AppUser? get currentUser {
+    final id = _prefs.getString(_key);
+    return id == null ? null : AppUser(id: id, isAnonymous: true);
+  }
+
+  @override
+  Stream<AppUser?> authStateChanges() async* {
+    yield currentUser;
+    yield* _changes.stream;
+  }
+
+  @override
+  Future<AppUser> ensureSignedIn() async {
+    final existing = currentUser;
+    if (existing != null) return existing;
+    await _prefs.setString(_key, _uuid.v4());
+    _changes.add(currentUser);
+    return currentUser!;
+  }
+
+  static const _unavailable = AuthFailure('Paskyros šioje versijoje nepasiekiamos (serveris nesukonfigūruotas).');
+
+  @override
+  Future<AppUser> signInWithEmail(String email, String password) async => throw _unavailable;
+
+  @override
+  Future<bool> signUpWithEmail(String email, String password) async => throw _unavailable;
+
+  @override
+  Future<void> linkEmail(String email) async => throw _unavailable;
+
+  @override
+  Future<void> signOut() async {
+    await _prefs.remove(_key);
+    _changes.add(null);
+  }
+}
+
+final authRepositoryProvider = Provider<AuthRepository>((ref) {
+  final client = ref.watch(supabaseClientProvider);
+  return client == null
+      ? LocalGuestAuthRepository(ref.watch(sharedPreferencesProvider))
+      : SupabaseAuthRepository(client.auth);
+});
+
+final authStateProvider = StreamProvider<AppUser?>(
+  (ref) => ref.watch(authRepositoryProvider).authStateChanges(),
+);

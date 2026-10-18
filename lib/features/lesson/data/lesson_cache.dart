@@ -1,8 +1,8 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
 
+import '../../../core/storage/json_file.dart';
 import '../../../core/utils/json.dart';
 
 /// Vietinė atsisiųsto turinio kopija darbui be interneto.
@@ -16,8 +16,7 @@ abstract interface class LessonCache {
 /// JSON failai programėlės palaikymo kataloge:
 /// `content_cache/catalog.json` ir `content_cache/lessons/<id>.json`.
 ///
-/// Rašoma per laikiną failą ir `rename`, kad nutrūkęs įrašas nesugadintų
-/// ankstesnės kopijos. Sugadintas ar neperskaitomas failas traktuojamas kaip
+/// Rašoma atomiškai ([writeJsonFile]); sugadintas failas traktuojamas kaip
 /// kešo nebuvimas.
 class FileLessonCache implements LessonCache {
   FileLessonCache({Future<Directory> Function()? rootDirectory})
@@ -42,33 +41,15 @@ class FileLessonCache implements LessonCache {
   }
 
   @override
-  Future<Json?> readCatalog() async => _read(await _catalogFile());
+  Future<Json?> readCatalog() async => readJsonFile(await _catalogFile());
 
   @override
-  Future<void> writeCatalog(Json catalog) async => _write(await _catalogFile(), catalog);
+  Future<void> writeCatalog(Json catalog) async => writeJsonFile(await _catalogFile(), catalog);
 
   @override
-  Future<Json?> readLesson(String lessonId) async => _read(await _lessonFile(lessonId));
+  Future<Json?> readLesson(String lessonId) async => readJsonFile(await _lessonFile(lessonId));
 
   @override
   Future<void> writeLesson(String lessonId, Json content) async =>
-      _write(await _lessonFile(lessonId), content);
-
-  Future<Json?> _read(File file) async {
-    try {
-      if (!await file.exists()) return null;
-      return jsonDecode(await file.readAsString()) as Json;
-    } on FormatException {
-      return null;
-    } on TypeError {
-      return null;
-    }
-  }
-
-  Future<void> _write(File file, Json data) async {
-    await file.parent.create(recursive: true);
-    final tmp = File('${file.path}.tmp');
-    await tmp.writeAsString(jsonEncode(data), flush: true);
-    await tmp.rename(file.path);
-  }
+      writeJsonFile(await _lessonFile(lessonId), content);
 }

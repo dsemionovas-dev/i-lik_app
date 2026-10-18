@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../app/router/routes.dart';
 import '../../lesson/data/lesson_repository.dart';
 import '../../lesson/domain/models/catalog.dart';
+import '../../progress/application/progress_controller.dart';
+import '../../progress/domain/models/user_progress.dart';
 
 /// Kursai → skyriai → pamokos iš turinio katalogo (serveris, kešas arba assets).
 /// TODO: vingiuotas kelias su mazgų būsenomis (užrakinta / aktyvi / baigta / auksinė).
@@ -19,7 +21,10 @@ class LessonTreeScreen extends ConsumerWidget {
       body: RefreshIndicator(
         onRefresh: () => ref.refresh(catalogProvider.future),
         child: catalog.when(
-          data: (catalog) => _CatalogList(catalog: catalog),
+          data: (catalog) => _CatalogList(
+            catalog: catalog,
+            progress: ref.watch(progressControllerProvider).value?.progress ?? const {},
+          ),
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => ListView(
             padding: const EdgeInsets.all(24),
@@ -32,9 +37,10 @@ class LessonTreeScreen extends ConsumerWidget {
 }
 
 class _CatalogList extends StatelessWidget {
-  const _CatalogList({required this.catalog});
+  const _CatalogList({required this.catalog, required this.progress});
 
   final ContentCatalog catalog;
+  final Map<String, UserProgress> progress;
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +69,7 @@ class _CatalogList extends StatelessWidget {
                 leading: const Icon(Icons.play_circle_outline),
                 title: Text(lesson.title),
                 subtitle: Text('${lesson.estimatedMinutes} min'),
+                trailing: _stars(progress[lesson.id]),
                 onTap: () => context.push(Routes.lesson(lesson.id)),
               ),
           ],
@@ -72,6 +79,11 @@ class _CatalogList extends StatelessWidget {
     );
   }
 }
+
+/// Baigtos pamokos žvaigždutės; nebaigtai – nieko.
+Widget? _stars(UserProgress? p) => p == null || !p.isCompleted
+    ? null
+    : Text('★' * p.stars + '☆' * (3 - p.stars), semanticsLabel: '${p.stars} iš 3 žvaigždučių');
 
 class _OfflineBanner extends StatelessWidget {
   const _OfflineBanner();

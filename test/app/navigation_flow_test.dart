@@ -1,15 +1,21 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:islik/app/app.dart';
 import 'package:islik/core/storage/shared_preferences_provider.dart';
+import 'package:islik/features/auth/data/auth_repository.dart';
+import 'package:islik/features/auth/domain/app_user.dart';
 import 'package:islik/features/lesson/data/lesson_repository.dart';
+import 'package:islik/features/progress/application/progress_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../helpers/fakes.dart';
 
-Future<void> pumpApp(WidgetTester tester, {bool onboarded = false}) async {
+Future<void> pumpApp(WidgetTester tester, {bool onboarded = false, List<Override> overrides = const []}) async {
   // Kešuotas ankstesnio testo Future neužsibaigia naujo testo fake-async zonoje.
   rootBundle.clear();
   SharedPreferences.setMockInitialValues({'onboarding_completed': onboarded});
@@ -18,6 +24,8 @@ Future<void> pumpApp(WidgetTester tester, {bool onboarded = false}) async {
     overrides: [
       sharedPreferencesProvider.overrideWithValue(prefs),
       lessonCacheProvider.overrideWithValue(InMemoryLessonCache()),
+      progressStoreProvider.overrideWithValue(InMemoryProgressStore()),
+      ...overrides,
     ],
     child: const IslikApp(),
   ));
@@ -48,6 +56,47 @@ Future<void> tapHotspot(WidgetTester tester, double x, double y) async {
   final r = tester.getRect(canvas);
   await tester.tapAt(r.topLeft + Offset(r.width * x, r.height * y));
   await tester.pump();
+}
+
+/// Profilio statistikos plytelės reikšmė pagal pavadinimą.
+String statValue(WidgetTester tester, String label) => tester
+    .widget<Text>(find.descendant(
+      of: find.ancestor(of: find.text(label), matching: find.byType(Column)).first,
+      matching: find.byType(Text),
+    ).first)
+    .data!;
+
+/// Pereina visą pamoką neteisingais atsakymais (0 %, 10 XP) iki rezultatų ekrano.
+Future<void> finishLessonAllWrong(WidgetTester tester) async {
+  await tester.tap(find.text('PRADĖTI'));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('SUPRATAU'));
+  await tester.pumpAndSettle();
+  Future<void> checkAndContinue() async {
+    await tester.tap(find.text('TIKRINTI'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('TĘSTI'));
+    await tester.pumpAndSettle();
+  }
+
+  await tapVisible(tester, find.text('0°'));
+  await checkAndContinue();
+  await tapVisible(tester, find.text('Pakreiptas kompasas'));
+  await checkAndContinue();
+  await checkAndContinue(); // order_steps
+  await connectPairs(tester, const [
+    ('Magnetinė adata', 'Nukreipiama į tikslą'),
+    ('Krypties rodyklė', 'Nustato azimutą laipsniais'),
+    ('Sukamas žiedas', 'Rodo magnetinę šiaurę'),
+  ]);
+  await checkAndContinue();
+  await tapVisible(tester, find.text('Teisinga'));
+  await checkAndContinue();
+  await tapHotspot(tester, 0.1, 0.5);
+  await checkAndContinue();
+  await tapVisible(tester, find.text('Einu „pagal jausmą“, kompasą tikrinu kas valandą'));
+  await checkAndContinue();
+  expect(find.text('Pamoka baigta!'), findsOneWidget);
 }
 
 void main() {
@@ -178,11 +227,24 @@ void main() {
     // tvarka neteisinga – be premijos, po jos tik 4 iš eilės – be combo
     expect(find.text('+25 XP'), findsOneWidget);
     expect(find.text('Tikslumas: 86 %'), findsOneWidget);
+    // Be Supabase – tik šiame įrenginyje.
+    expect(find.text('Progresas išsaugotas šiame įrenginyje.'), findsOneWidget);
 
     await tester.tap(find.text('TĘSTI'));
     await tester.pumpAndSettle();
     expect(find.byType(NavigationBar), findsOneWidget);
     expect(find.text('Kita pamoka: Kompaso azimutas'), findsOneWidget);
+
+    // Progresas matomas profilyje ir kelyje (86 % → 2 žvaigždutės).
+    await tester.tap(find.text('Profilis'));
+    await tester.pumpAndSettle();
+    expect(statValue(tester, 'XP'), '25');
+    expect(statValue(tester, 'Baigtos pamokos'), '1');
+    await tester.tap(find.text('Kelias'));
+    await tester.pumpAndSettle();
+    // Navigacijos kursas – trečias, žemiau ekrano.
+    await tester.scrollUntilVisible(find.text('★★☆'), 200, scrollable: find.byType(Scrollable).last);
+    expect(find.text('★★☆'), findsOneWidget);
   });
 
   testWidgets('pamokos uždarymas klausia patvirtinimo', (tester) async {
@@ -267,5 +329,95 @@ void main() {
     // Visi atsakymai neteisingi – tik bazinis XP.
     expect(find.text('+10 XP'), findsOneWidget);
     expect(find.text('Tikslumas: 0 %'), findsOneWidget);
+  });
+
+  group('su Supabase (fiktyvus serveris)', () {
+    late FakeAuthRepository auth;
+    late FakeProgressRemote remote;
+
+    List<Override> online() => [
+          authRepositoryProvider.overrideWithValue(auth),
+          progressRemoteDataSourceProvider.overrideWithValue(remote),
+        ];
+
+    setUp(() {
+      auth = FakeAuthRepository(user: const AppUser(id: 'guest-1', isAnonymous: true));
+      remote = FakeProgressRemote(userId: 'guest-1');
+    });
+
+    testWidgets('užbaigta pamoka iškart išsiunčiama į serverį', (tester) async {
+      await pumpApp(tester, onboarded: true, overrides: online());
+      await finishLessonAllWrong(tester);
+
+      expect(find.text('Progresas išsaugotas.'), findsOneWidget);
+      final attempt = remote.received.single;
+      expect((attempt.lessonId, attempt.lessonVersion, attempt.xp, attempt.accuracy), ('nav-u02-l03', 4, 10, 0.0));
+      expect(remote.rows['nav-u02-l03']!.xpEarned, 10);
+    });
+
+    testWidgets('be ryšio progresas kaupiamas ir išsiunčiamas grįžus į programėlę', (tester) async {
+      remote.failWith = (_) => const SocketException('nėra ryšio');
+      await pumpApp(tester, onboarded: true, overrides: online());
+      await finishLessonAllWrong(tester);
+
+      expect(find.text('Progresas išsaugotas įrenginyje ir bus išsiųstas, kai atsiras ryšys.'), findsOneWidget);
+      await tester.tap(find.text('TĘSTI'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Profilis'));
+      await tester.pumpAndSettle();
+      expect(statValue(tester, 'XP'), '10', reason: 'vietinis progresas matomas be ryšio');
+      expect(find.text('Laukia išsiuntimo: 1 (nėra ryšio)'), findsOneWidget);
+      expect(remote.received, isEmpty);
+
+      // Atsirado ryšys; vartotojas grįžta į programėlę.
+      remote.failWith = null;
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+
+      expect(remote.received, hasLength(1));
+      expect(find.textContaining('Laukia išsiuntimo'), findsNothing);
+      expect(statValue(tester, 'XP'), '10');
+    });
+
+    testWidgets('profilyje svečias gali susieti el. paštą', (tester) async {
+      await pumpApp(tester, onboarded: true, overrides: online());
+      await tester.tap(find.text('Profilis'));
+      await tester.pumpAndSettle();
+      expect(find.text('Svečio režimas'), findsOneWidget);
+
+      await tester.tap(find.text('Susieti el. paštą'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const ValueKey('email-field')), 'jonas@pastas.lt');
+      await tester.tap(find.text('Tęsti'));
+      await tester.pumpAndSettle();
+
+      expect(auth.calls, contains('link:jonas@pastas.lt'));
+      expect(find.textContaining('Patvirtinkite el. paštą'), findsOneWidget);
+    });
+
+    testWidgets('atsijungimas įspėja apie neišsiųstus bandymus ir išvalo vietinį progresą', (tester) async {
+      auth.setUser(const AppUser(id: 'user-1', email: 'jonas@pastas.lt'));
+      remote
+        ..userId = 'user-1'
+        ..failWith = (_) => const SocketException('nėra ryšio');
+      await pumpApp(tester, onboarded: true, overrides: online());
+      await finishLessonAllWrong(tester);
+      await tester.tap(find.text('TĘSTI'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Profilis'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('account-email')), findsOneWidget);
+
+      await tapVisible(tester, find.text('Atsijungti'));
+      await tester.pumpAndSettle();
+      expect(find.text('Dar neišsiųsta bandymų: 1. Atsijungus jie bus prarasti.'), findsOneWidget);
+      await tester.tap(find.widgetWithText(TextButton, 'Atsijungti'));
+      await tester.pumpAndSettle();
+
+      expect(auth.currentUser, isNull);
+      expect(statValue(tester, 'XP'), '0');
+      expect(find.text('Neprisijungta.'), findsOneWidget);
+    });
   });
 }

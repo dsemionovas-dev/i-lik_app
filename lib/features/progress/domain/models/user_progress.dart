@@ -49,6 +49,21 @@ class UserProgress {
   /// Tik vietinė būsena (offline eilė), į serverį nesiunčiama.
   final bool isSynced;
 
+  /// Pamoka dar nebandyta – pradinė būsena pirmam bandymui.
+  factory UserProgress.empty({
+    required String userId,
+    required String lessonId,
+    required int lessonVersion,
+    required DateTime at,
+  }) =>
+      UserProgress(
+        userId: userId,
+        lessonId: lessonId,
+        lessonVersion: lessonVersion,
+        status: LessonProgressStatus.inProgress,
+        updatedAt: at,
+      );
+
   bool get isCompleted => status != LessonProgressStatus.inProgress;
 
   /// Žvaigždutės pagal PRD: ≥ 60 % – 1, ≥ 80 % – 2, 100 % – 3.
@@ -119,6 +134,12 @@ class UserProgress {
         updatedAt: DateTime.parse(json['updated_at'] as String),
         isSynced: true,
       );
+
+  /// Vietinė kopija – su [isSynced] žyme.
+  factory UserProgress.fromLocalJson(Json json) =>
+      UserProgress.fromJson(json).copyWith(isSynced: json['is_synced'] as bool? ?? false);
+
+  Json toLocalJson() => {...toJson(), 'is_synced': isSynced};
 
   Json toJson() => {
         'user_id': userId,

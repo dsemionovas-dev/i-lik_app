@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../shared/widgets/placeholder_body.dart';
+import '../../auth/data/auth_repository.dart';
 import '../data/onboarding_controller.dart';
 
-/// TODO: kurso pasirinkimas, dienos tikslas, priminimai, paskyra / svečio režimas.
+/// TODO: kurso pasirinkimas, dienos tikslas, priminimai.
+/// Paskyra nereikalinga: sukuriamas svečias, kurį vėliau galima susieti su el. paštu.
 class OnboardingScreen extends ConsumerWidget {
   const OnboardingScreen({super.key});
 
@@ -16,7 +20,11 @@ class OnboardingScreen extends ConsumerWidget {
         children: [
           // Redirect'as pats nuveda į /home, kai būsena pasikeičia.
           FilledButton(
-            onPressed: () => ref.read(onboardingCompletedProvider.notifier).complete(),
+            onPressed: () {
+              // Svečias kuriamas fone: be ryšio bus sukurtas per pirmą sinchronizaciją.
+              unawaited(ref.read(authRepositoryProvider).ensureSignedIn().then<void>((_) {}, onError: (_) {}));
+              ref.read(onboardingCompletedProvider.notifier).complete();
+            },
             child: const Text('PRADĖTI'),
           ),
         ],

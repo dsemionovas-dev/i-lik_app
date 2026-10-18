@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/router/routes.dart';
+import '../../progress/application/progress_controller.dart';
 import '../data/lesson_repository.dart';
 import '../domain/models/lesson.dart';
 import '../domain/models/lesson_result.dart';
@@ -30,16 +33,16 @@ class LessonScreen extends ConsumerWidget {
 
 /// Pamokos eiga: užduotis → TIKRINTI → atsiliepimas → TĘSTI.
 /// Vėliau logiką verta perkelti į `application/lesson_session_controller.dart` (Notifier).
-class _LessonRunner extends StatefulWidget {
+class _LessonRunner extends ConsumerStatefulWidget {
   const _LessonRunner({required this.lesson});
 
   final Lesson lesson;
 
   @override
-  State<_LessonRunner> createState() => _LessonRunnerState();
+  ConsumerState<_LessonRunner> createState() => _LessonRunnerState();
 }
 
-class _LessonRunnerState extends State<_LessonRunner> {
+class _LessonRunnerState extends ConsumerState<_LessonRunner> {
   late final List<LessonItem> _items = widget.lesson.playableItems;
   final _startedAt = DateTime.now();
   final _answers = <bool>[];
@@ -119,6 +122,8 @@ class _LessonRunnerState extends State<_LessonRunner> {
       ),
       duration: DateTime.now().difference(_startedAt),
     );
+    // Vietinis įrašas + siuntimas fone; rezultatų ekranas nelaukia tinklo.
+    unawaited(ref.read(progressControllerProvider.notifier).recordLessonResult(widget.lesson, result));
     context.pushReplacement(Routes.lessonResult(widget.lesson.id), extra: result);
   }
 
